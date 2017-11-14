@@ -16,11 +16,13 @@
 package io.fabric8;
 
 import com.cloudbees.groovy.cps.NonCPS;
+import io.fabric8.kubernetes.api.KubernetesHelper;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.pipeline.steps.helpers.DomUtils;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
-import io.fabric8.pipeline.steps.helpers.NumberHelpers;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
 import io.fabric8.utils.XmlUtils;
@@ -47,6 +49,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.fabric8.Utils.createKubernetesClient;
+import static io.fabric8.Utils.defaultNamespace;
 import static java.lang.Integer.parseInt;
 
 public class Fabric8Commands extends FunctionSupport {
@@ -78,7 +82,7 @@ public class Fabric8Commands extends FunctionSupport {
         }
         try {
             return ghb.build();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new FailedBuildException("Could not connect to github", e);
         }
     }
@@ -90,9 +94,9 @@ public class Fabric8Commands extends FunctionSupport {
 
     public String getReleaseVersionFromMavenMetadata(String url) {
         try {
-            String result = execBashAndGetOutput("curl -L " + url + " | grep \'<latest\' | cut -f2 -d\'>\'|cut -f1 -d\'<\'");
+            String result = sh("curl -L " + url + " | grep \'<latest\' | cut -f2 -d\'>\'|cut -f1 -d\'<\'");
             return result.trim();
-        } catch (IOException e) {
+        } catch (Exception e) {
             error("Failed to find release version from maven central " + url + " due to: " + e);
             return null;
         }
@@ -100,8 +104,8 @@ public class Fabric8Commands extends FunctionSupport {
 
     public String updatePackageJSONVersion(final String f, final Object p, final Object v) {
         try {
-            return execBashAndGetOutput("sed -i -r \'s/\"" + p + "\": \"[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?(-development)?\"/\"" + p + "\": \"" + v + "\"/g\' " + f).trim();
-        } catch (IOException e) {
+            return sh("sed -i -r \'s/\"" + p + "\": \"[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?(-development)?\"/\"" + p + "\": \"" + v + "\"/g\' " + f).trim();
+        } catch (Exception e) {
             error("Failed to get package json version", e);
             return null;
         }
@@ -109,8 +113,8 @@ public class Fabric8Commands extends FunctionSupport {
 
     public Object updateDockerfileEnvVar(final String f, final Object p, final Object v) {
         try {
-            return execBashAndGetOutput("sed -i -r \'s/ENV " + p + ".*/ENV " + p + " " + v + "/g\' " + f);
-        } catch (IOException e) {
+            return sh("sed -i -r \'s/ENV " + p + ".*/ENV " + p + " " + v + "/g\' " + f);
+        } catch (Exception e) {
             error("Failed to get dockerfile env var", e);
             return null;
         }
@@ -124,15 +128,15 @@ public class Fabric8Commands extends FunctionSupport {
             error("Failed to parse pom.xml", e);
             return null;
         }
-        return DomUtils.firstElementText(doc, "version", "pom.xml");
+        return DomUtils.firstElementText(getLogger(), doc, "version", "pom.xml");
     }
 
     public String getReleaseVersion(final String artifact) {
-        return DomUtils.parseXmlForURLAndReturnFirstElementText("https://oss.sonatype.org/content/repositories/releases/" + artifact + "/maven-metadata.xml", "latest");
+        return DomUtils.parseXmlForURLAndReturnFirstElementText(getLogger(), "https://oss.sonatype.org/content/repositories/releases/" + artifact + "/maven-metadata.xml", "latest");
     }
 
     public String getMavenCentralVersion(final String artifact) {
-        return DomUtils.parseXmlForURLAndReturnFirstElementText("http://central.maven.org/maven2/" + artifact + "/maven-metadata.xml", "latest");
+        return DomUtils.parseXmlForURLAndReturnFirstElementText(getLogger(), "http://central.maven.org/maven2/" + artifact + "/maven-metadata.xml", "latest");
     }
 
     public String getVersion(String repo, String artifact) {
@@ -140,7 +144,7 @@ public class Fabric8Commands extends FunctionSupport {
         artifact = Strings.stripSuffix(artifact, "/");
 
         String url = repo + "/" + artifact + "/maven-metadata.xml";
-        return DomUtils.parseXmlForURLAndReturnFirstElementText(url, "latest");
+        return DomUtils.parseXmlForURLAndReturnFirstElementText(getLogger(), url, "latest");
     }
 
     public boolean isArtifactAvailableInRepo(String repo, String groupId, String artifactId, String version, String ext) {
@@ -219,7 +223,7 @@ public class Fabric8Commands extends FunctionSupport {
 
         List<String> answer = new ArrayList<>();
         try {
-            execBashAndGetOutput("find target/nexus-staging/staging/  -maxdepth 1 -name \"*.properties\" > target/nexus-staging/staging/repos.txt").trim();
+            sh("find target/nexus-staging/staging/  -maxdepth 1 -name \"*.properties\" > target/nexus-staging/staging/repos.txt").trim();
             String repos = readFile("target/nexus-staging/staging/repos.txt");
             String[] lines = repos.split("\n");
             for (String line : lines) {
@@ -230,7 +234,7 @@ public class Fabric8Commands extends FunctionSupport {
                 }
             }
             return answer;
-        } catch (IOException e) {
+        } catch (Exception e) {
             error("Failed to find repoIds", e);
             return Collections.EMPTY_LIST;
         }
@@ -246,54 +250,54 @@ public class Fabric8Commands extends FunctionSupport {
 
     public String searchAndReplaceMavenVersionPropertyNoCommit(final String property, final String newVersion) throws IOException {
         // example matches <fabric8.version>2.3</fabric8.version> <fabric8.version>2.3.12</fabric8.version> <fabric8.version>2.3.12.5</fabric8.version>
-        return execBashAndGetOutput("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
+        return sh("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
     }
 
     public String searchAndReplaceMavenVersionProperty(final String property, final String newVersion) throws IOException {
         // example matches <fabric8.version>2.3</fabric8.version> <fabric8.version>2.3.12</fabric8.version> <fabric8.version>2.3.12.5</fabric8.version>
-        execBashAndGetOutput("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
-        return execBashAndGetOutput("git commit -a -m \'Bump " + property + " version\'").trim();
+        sh("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
+        return sh("git commit -a -m \'Bump " + property + " version\'").trim();
     }
 
     public String searchAndReplaceMavenSnapshotProfileVersionProperty(final String property, final String newVersion) throws IOException {
         // example matches <fabric8.version>2.3-SNAPSHOT</fabric8.version> <fabric8.version>2.3.12-SNAPSHOT</fabric8.version> <fabric8.version>2.3.12.5-SNAPSHOT</fabric8.version>
-        execBashAndGetOutput("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?-SNAPSHOT</" + property + newVersion + "-SNAPSHOT</g\'");
-        return execBashAndGetOutput("git commit -a -m \'Bump " + property + " development profile SNAPSHOT version\'");
+        sh("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?-SNAPSHOT</" + property + newVersion + "-SNAPSHOT</g\'");
+        return sh("git commit -a -m \'Bump " + property + " development profile SNAPSHOT version\'");
     }
 
     public String setupWorkspaceForRelease(String project, Boolean useGitTagForNextVersion, String mvnExtraArgs, String currentVersion) throws IOException {
-        execBashAndGetOutput("git config user.email fabric8-admin@googlegroups.com");
-        execBashAndGetOutput("git config user.name fabric8-release");
+        sh("git config user.email fabric8-admin@googlegroups.com");
+        sh("git config user.name fabric8-release");
 
-        execBashAndGetOutput("chmod 600 /root/.ssh-git/ssh-key");
-        execBashAndGetOutput("chmod 600 /root/.ssh-git/ssh-key.pub");
-        execBashAndGetOutput("chmod 700 /root/.ssh-git");
-        execBashAndGetOutput("chmod 600 /home/jenkins/.gnupg/pubring.gpg");
-        execBashAndGetOutput("chmod 600 /home/jenkins/.gnupg/secring.gpg");
-        execBashAndGetOutput("chmod 600 /home/jenkins/.gnupg/trustdb.gpg");
-        execBashAndGetOutput("chmod 700 /home/jenkins/.gnupg");
+        sh("chmod 600 /root/.ssh-git/ssh-key");
+        sh("chmod 600 /root/.ssh-git/ssh-key.pub");
+        sh("chmod 700 /root/.ssh-git");
+        sh("chmod 600 /home/jenkins/.gnupg/pubring.gpg");
+        sh("chmod 600 /home/jenkins/.gnupg/secring.gpg");
+        sh("chmod 600 /home/jenkins/.gnupg/trustdb.gpg");
+        sh("chmod 700 /home/jenkins/.gnupg");
 
-        execBashAndGetOutput("git tag -d $(git tag)");
-        execBashAndGetOutput("git fetch --tags");
+        sh("git tag -d $(git tag)");
+        sh("git fetch --tags");
 
         if (useGitTagForNextVersion) {
             final String newVersion = getNewVersionFromTag(currentVersion);
             echo("New release version " + newVersion);
-            execBashAndGetOutput("mvn -B -U versions:set -DnewVersion=" + newVersion + " " + mvnExtraArgs);
-            execBashAndGetOutput("git commit -a -m \'release " + newVersion + "\'");
+            sh("mvn -B -U versions:set -DnewVersion=" + newVersion + " " + mvnExtraArgs);
+            sh("git commit -a -m \'release " + newVersion + "\'");
             pushTag(newVersion);
         } else {
-            execBashAndGetOutput("mvn -B build-helper:parse-version versions:set -DnewVersion=${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion} " + mvnExtraArgs);
+            sh("mvn -B build-helper:parse-version versions:set -DnewVersion=${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion} " + mvnExtraArgs);
         }
 
         final String releaseVersion = getProjectVersion();
 
         // delete any previous branches of this release
         try {
-            return execBashAndGetOutput("git checkout -b release-v" + releaseVersion);
+            return sh("git checkout -b release-v" + releaseVersion);
         } catch (Exception err) {
-            execBashAndGetOutput("git branch -D release-v" + releaseVersion);
-            return execBashAndGetOutput("git checkout -b release-v" + releaseVersion);
+            sh("git branch -D release-v" + releaseVersion);
+            return sh("git checkout -b release-v" + releaseVersion);
         }
     }
 
@@ -306,7 +310,7 @@ public class Fabric8Commands extends FunctionSupport {
     }
 
     public String getNewVersionFromTag(String pomVersion) throws IOException {
-        return execBashAndGetOutput("semver-release-version --folder " + getCurrentDir().getPath()).trim();
+        return sh("semver-release-version --folder " + getCurrentDir().getPath()).trim();
 /*        final String version = "1.0.0";
 
         // Set known prerelease prefixes, needed for the proper sort order
@@ -392,8 +396,8 @@ public class Fabric8Commands extends FunctionSupport {
 
     public List<String> stageSonartypeRepo() {
         try {
-            execBashAndGetOutput("mvn clean -B");
-            execBashAndGetOutput("mvn -V -B -e -U install org.sonatype.plugins:nexus-staging-maven-plugin:1.6.7:deploy -P release -P openshift -DnexusUrl=https://oss.sonatype.org -DserverId=oss-sonatype-staging -Ddocker.push.registry=" + System.getenv("FABRIC8_DOCKER_REGISTRY_SERVICE_HOST") + ":" + System.getenv("FABRIC8_DOCKER_REGISTRY_SERVICE_PORT"));
+            sh("mvn clean -B");
+            sh("mvn -V -B -e -U install org.sonatype.plugins:nexus-staging-maven-plugin:1.6.7:deploy -P release -P openshift -DnexusUrl=https://oss.sonatype.org -DserverId=oss-sonatype-staging -Ddocker.push.registry=" + System.getenv("FABRIC8_DOCKER_REGISTRY_SERVICE_HOST") + ":" + System.getenv("FABRIC8_DOCKER_REGISTRY_SERVICE_PORT"));
 
             // lets not archive artifacts until we if we just use nexus or a content repo
             //step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
@@ -414,12 +418,12 @@ public class Fabric8Commands extends FunctionSupport {
     public Object releaseSonartypeRepo(final String repoId) {
         try {
             // release the sonartype staging repo
-            return execBashAndGetOutput("mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-release -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Next release is ready\" -DstagingProgressTimeoutMinutes=60");
+            return sh("mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-release -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Next release is ready\" -DstagingProgressTimeoutMinutes=60");
 
         } catch (Exception err) {
             try {
-                execBashAndGetOutput("mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-drop -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Error during release: " + err + "\" -DstagingProgressTimeoutMinutes=60");
-            } catch (IOException e) {
+                sh("mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-drop -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Error during release: " + err + "\" -DstagingProgressTimeoutMinutes=60");
+            } catch (Exception e) {
                 error("Failed to drop the staging repository " + e, e);
             }
             throw new FailedBuildException("ERROR releasing sonartype repo " + repoId + ": " + err, err);
@@ -429,8 +433,8 @@ public class Fabric8Commands extends FunctionSupport {
     public Object dropStagingRepo(final String repoId) {
         echo("Not a release so dropping staging repo " + repoId);
         try {
-            return execBashAndGetOutput("mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-drop -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Dry run\" -DstagingProgressTimeoutMinutes=60");
-        } catch (IOException e) {
+            return sh("mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-drop -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Dry run\" -DstagingProgressTimeoutMinutes=60");
+        } catch (Exception e) {
             error("Failed to drop staging repository " + repoId + ". " + e, e);
         }
         return null;
@@ -439,29 +443,29 @@ public class Fabric8Commands extends FunctionSupport {
     public Object helm() {
         final Object pluginVersion = getReleaseVersion("io/fabric8/fabric8-maven-plugin");
         try {
-            execBashAndGetOutput("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm");
-            return execBashAndGetOutput("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm-push");
+            sh("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm");
+            return sh("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm-push");
         } catch (Exception err) {
             throw new FailedBuildException("ERROR with helm push " + err, err);
         }
     }
 
     public Object pushTag(final String releaseVersion) throws IOException {
-        execBashAndGetOutput("git tag -fa v" + releaseVersion + " -m \'Release version " + releaseVersion + "\'");
-        return execBashAndGetOutput("git push origin v" + releaseVersion);
+        sh("git tag -fa v" + releaseVersion + " -m \'Release version " + releaseVersion + "\'");
+        return sh("git push origin v" + releaseVersion);
     }
 
     public String updateGithub() throws IOException {
         final String releaseVersion = getProjectVersion();
-        return execBashAndGetOutput("git push origin release-v" + releaseVersion);
+        return sh("git push origin release-v" + releaseVersion);
     }
 
     public Object updateNextDevelopmentVersion(String releaseVersion, String mvnExtraArgs) throws IOException {
         // update poms back to snapshot again
-        execBashAndGetOutput("mvn -B build-helper:parse-version versions:set -DnewVersion=${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT " + mvnExtraArgs);
+        sh("mvn -B build-helper:parse-version versions:set -DnewVersion=${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT " + mvnExtraArgs);
         final Object snapshotVersion = getProjectVersion();
-        execBashAndGetOutput("git commit -a -m \'[CD] prepare for next development iteration " + snapshotVersion + "\'");
-        return execBashAndGetOutput("git push origin release-v" + releaseVersion);
+        sh("git commit -a -m \'[CD] prepare for next development iteration " + snapshotVersion + "\'");
+        return sh("git push origin release-v" + releaseVersion);
     }
 
     public Object updateNextDevelopmentVersion(String releaseVersion) throws IOException {
@@ -469,7 +473,7 @@ public class Fabric8Commands extends FunctionSupport {
     }
 
     public Boolean hasChangedSinceLastRelease() throws IOException {
-        execBashAndGetOutput("git log --name-status HEAD^..HEAD -1 --grep=\"prepare for next development iteration\" --author='fusesource-ci' >> gitlog.tmp");
+        sh("git log --name-status HEAD^..HEAD -1 --grep=\"prepare for next development iteration\" --author='fusesource-ci' >> gitlog.tmp");
         File file = createFile("gitlog.tmp");
         String myfile = IOHelpers.readFully(file).trim();
         file.delete();
@@ -500,15 +504,15 @@ TODO
 
 
         // use perl so that we we can easily turn off regex in the SED query as using dots in version numbers returns unwanted results otherwise
-        execBashAndGetOutput("find . -name \'*.md\' ! -name Changes.md ! -path \'*/docs/jube/**.*\' | xargs perl -p -i -e \'s/\\Q" + oldVersion + "/" + newVersion + "/g\'");
-        execBashAndGetOutput("find . -path \'*/website/src/**.*\' | xargs perl -p -i -e \'s/\\Q" + oldVersion + "/" + newVersion + "/g\'");
+        sh("find . -name \'*.md\' ! -name Changes.md ! -path \'*/docs/jube/**.*\' | xargs perl -p -i -e \'s/\\Q" + oldVersion + "/" + newVersion + "/g\'");
+        sh("find . -path \'*/website/src/**.*\' | xargs perl -p -i -e \'s/\\Q" + oldVersion + "/" + newVersion + "/g\'");
 
-        return execBashAndGetOutput("git commit -a -m \'[CD] Update docs following " + newVersion + " release\'");
+        return sh("git commit -a -m \'[CD] Update docs following " + newVersion + " release\'");
 
     }
 
     public Object runSystemTests() throws IOException {
-        return execBashAndGetOutput("cd systests && mvn clean && mvn integration-test verify");
+        return sh("cd systests && mvn clean && mvn integration-test verify");
     }
 
     @NonCPS
@@ -529,18 +533,18 @@ TODO
         GHRepository repository = null;
         try {
             repository = gitHub.getRepository(project);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new FailedBuildException("Could not find repository " + project, e);
         }
         GHIssue issue = null;
         try {
             issue = repository.getIssue(issueNumber);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new FailedBuildException("Could not find issue #" + issueNumber + " on repository " + project, e);
         }
         try {
             return issue.getComments();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new FailedBuildException("Could not load comments for issue #" + issueNumber + " on repository " + project, e);
         }
     }
@@ -551,6 +555,61 @@ TODO
 
     public List<GHIssueComment> getIssueComments(String project, int id) {
         return getIssueComments(project, id, null);
+    }
+
+
+    @NonCPS
+    public Boolean isSingleNode() {
+        KubernetesClient kubernetes = createKubernetesClient();
+        try {
+            if (kubernetes.nodes().list().getItems().size() == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            error("Failed to query nodes - probably due to security restrictions", e);
+            return false;
+        }
+
+    }
+
+    @NonCPS
+    public Boolean hasService(String name) {
+        KubernetesClient kubernetes = createKubernetesClient();
+        try {
+            Service service = kubernetes.services().withName(name).get();
+            if (service != null) {
+                return service.getMetadata() != null;
+            }
+        } catch (Exception e) {
+            error("Failed to find service " + name, e);
+        }
+        return false;
+    }
+
+    @NonCPS
+    public String getServiceURL(String serviceName, String namespace, String protocol, boolean external) {
+        KubernetesClient kubernetes = createKubernetesClient();
+        if (namespace == null) {
+            namespace = defaultNamespace(kubernetes);
+        }
+        return KubernetesHelper.getServiceURL(kubernetes, serviceName, namespace, protocol, external);
+    }
+
+    @NonCPS
+    public String getServiceURL(String serviceName, String namespace, String protocol) {
+        return getServiceURL(serviceName, namespace, protocol, true);
+    }
+
+    @NonCPS
+    public String getServiceURL(String serviceName, String namespace) {
+        return getServiceURL(serviceName, namespace, "http", true);
+    }
+
+    @NonCPS
+    public String getServiceURL(String serviceName) {
+        return getServiceURL(serviceName, null, "http", true);
     }
 
 
@@ -1046,50 +1105,6 @@ final String tokenPath="/home/jenkins/.apitoken/hub";
         return githubToken.invokeMethod("trim",new Object[0]);
         }
 
-@NonCPS
-public Boolean isSingleNode(){
-        KubernetesClient kubernetes=new DefaultKubernetesClient();
-        if(((DefaultKubernetesClient)kubernetes).nodes().list().getItems().size()==1){
-        return true;
-        }else{
-        return false;
-        }
-
-        }
-
-@NonCPS
-public Boolean hasService(String name){
-        KubernetesClient kubernetes=new DefaultKubernetesClient();
-
-        Service service=((DefaultKubernetesClient)kubernetes).services().withName(name).get();
-        if(service!=null){
-        return service.getMetadata()!=null;
-        }
-
-        return false;
-        }
-
-@NonCPS
-public String getServiceURL(String serviceName,String namespace,String protocol,boolean external){
-        KubernetesClient kubernetes=new DefaultKubernetesClient();
-        if(namespace==null)namespace=((DefaultKubernetesClient)kubernetes).getNamespace();
-        return KubernetesHelper.getServiceURL(kubernetes,serviceName,namespace,protocol,external);
-        }
-
-@NonCPS
-public String getServiceURL(String serviceName,String namespace,String protocol){
-        return getServiceURL(serviceName,namespace,protocol,true);
-        }
-
-@NonCPS
-public String getServiceURL(String serviceName,String namespace){
-        return getServiceURL(serviceName,namespace,"http",true);
-        }
-
-@NonCPS
-public String getServiceURL(String serviceName){
-        return getServiceURL(serviceName,null,"http",true);
-        }
 
 */
 
@@ -1135,11 +1150,13 @@ final Object openshiftYaml=invokeMethod("findFiles",new Object[]{map);
  * Should be called after checkout scm
  * <p>
  * Should be called after checkout scm
+ * <p>
+ * Should be called after checkout scm
  *//*
 
 @NonCPS
 public Boolean deleteNamespace(final String name){
-        KubernetesClient kubernetes=new DefaultKubernetesClient();
+        KubernetesClient kubernetes=createKubernetesClient();
         try{
         Namespace namespace=((DefaultKubernetesClient)kubernetes).namespaces().withName(name).get();
         if(namespace!=null){

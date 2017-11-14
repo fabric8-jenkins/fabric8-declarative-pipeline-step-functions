@@ -1,5 +1,6 @@
 #!/usr/bin/groovy
 import io.fabric8.Utils
+import io.fabric8.pipeline.steps.JUnitResults
 
 def call(body) {
     // evaluate the body block, and collect configuration into the object
@@ -31,6 +32,6 @@ def call(body) {
     } else {
         sh "mvn org.apache.maven.plugins:maven-failsafe-plugin:2.18.1:integration-test ${kubeNS} -Dit.test=${config.itestPattern} -DfailIfNoTests=${config.failIfNoTests} org.apache.maven.plugins:maven-failsafe-plugin:2.18.1:verify"
 
-        junitResults(body);
+        JUnitResults(body);
     }
   }

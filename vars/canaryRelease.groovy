@@ -1,4 +1,7 @@
 #!/usr/bin/groovy
+import io.fabric8.pipeline.steps.BayesianScanner
+import io.fabric8.pipeline.steps.ContentRepository
+import io.fabric8.pipeline.steps.SonarQubeScanner
 
 def call(body) {
     // evaluate the body block, and collect configuration into the object
@@ -38,12 +41,12 @@ def call(body) {
             utils.addAnnotationToBuild('fabric8.io/jenkins.changeUrl', changeUrl)
         }
 
-        bayesianScanner(body);
+        BayesianScanner(body);
     }
 
 
 
-    sonarQubeScanner(body);
+    SonarQubeScanner(body);
 
 
     def s2iMode = utils.supportsOpenShiftS2I()
@@ -63,5 +66,5 @@ def call(body) {
         }
     }
 
-    contentRepository(body);
+    ContentRepository(body);
   }

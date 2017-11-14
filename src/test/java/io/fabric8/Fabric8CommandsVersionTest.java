@@ -58,14 +58,14 @@ public class Fabric8CommandsVersionTest {
         Fabric8Commands step = new Fabric8Commands();
         step.setCurrentDir(dir);
 
-        step.execBashAndGetOutput("git init");
-        step.execBashAndGetOutput("echo Hello > ReadMe.md");
-        step.execBashAndGetOutput("git add *.md");
-        step.execBashAndGetOutput("git commit -m 'initial import'");
+        step.sh("git init");
+        step.sh("echo Hello > ReadMe.md");
+        step.sh("git add *.md");
+        step.sh("git commit -m 'initial import'");
 
         String[] commands = test.getCommands();
         for (String command : commands) {
-            step.execBashAndGetOutput(command);
+            step.sh(command);
         }
 
         String pomVersion = test.getPomVersion();

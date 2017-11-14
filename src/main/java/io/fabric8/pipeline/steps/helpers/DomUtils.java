@@ -16,6 +16,7 @@
 package io.fabric8.pipeline.steps.helpers;
 
 import io.fabric8.utils.XmlUtils;
+import io.jenkins.functions.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,7 +24,8 @@ import org.w3c.dom.NodeList;
 
 import java.net.URL;
 
-import static io.fabric8.Utils.error;
+import static io.fabric8.pipeline.steps.helpers.Loggers.error;
+
 
 /**
  */
@@ -43,24 +45,24 @@ public class DomUtils {
         return null;
     }
 
-    public static String firstElementText(Document doc, String elementName, String message) {
+    public static String firstElementText(Logger logger, Document doc, String elementName, String message) {
         Element e = firstElement(doc, elementName);
         if (e != null) {
             return e.getTextContent();
         } else {
-            error(message + " does not contain a <" + elementName + "> element!");
+            error(logger, message + " does not contain a <" + elementName + "> element!");
             return null;
         }
     }
 
-    public static String parseXmlForURLAndReturnFirstElementText(String url, String elementName) {
+    public static String parseXmlForURLAndReturnFirstElementText(Logger logger, String url, String elementName) {
         Document doc;
         try {
             doc = XmlUtils.parseDoc(new URL(url).openStream());
         } catch (Exception e) {
-            error("Failed to parse pom.xml", e);
+            error(logger, "Failed to parse pom.xml", e);
             return null;
         }
-        return firstElementText(doc, elementName, url);
+        return firstElementText(logger, doc, elementName, url);
     }
 }

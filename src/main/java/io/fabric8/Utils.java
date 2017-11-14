@@ -360,13 +360,13 @@ public class Utils extends FunctionSupport {
 
 
     public Object getLatestVersionFromTag() throws IOException {
-        execBashAndGetOutput("git fetch --tags");
-        execBashAndGetOutput("git config versionsort.prereleaseSuffix -RC");
-        execBashAndGetOutput("git config versionsort.prereleaseSuffix -M");
+        sh("git fetch --tags");
+        sh("git config versionsort.prereleaseSuffix -RC");
+        sh("git config versionsort.prereleaseSuffix -M");
 
         // if the repo has no tags this command will fail
         try {
-            String answer = execBashAndGetOutput("git tag --sort version:refname | tail -1").trim();
+            String answer = sh("git tag --sort version:refname | tail -1").trim();
             if (Strings.isNullOrBlank(answer)) {
                 error("no release tag found");
             } else if (answer.startsWith("v")) {

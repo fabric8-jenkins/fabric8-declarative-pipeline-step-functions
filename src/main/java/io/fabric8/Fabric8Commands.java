@@ -310,7 +310,8 @@ public class Fabric8Commands extends FunctionSupport {
     }
 
     public String getNewVersionFromTag(String pomVersion) throws IOException {
-        return sh("semver-release-version --folder " + getCurrentDir().getPath()).trim();
+        //return sh("semver-release-version --folder " + getCurrentDir().getPath()).trim();
+        return sh("semver-release-number");
 /*        final String version = "1.0.0";
 
         // Set known prerelease prefixes, needed for the proper sort order

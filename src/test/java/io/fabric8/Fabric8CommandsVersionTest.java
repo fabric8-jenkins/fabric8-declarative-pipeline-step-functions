@@ -40,7 +40,7 @@ public class Fabric8CommandsVersionTest {
     public void testVersions() throws Exception {
         assertVersion(new VersionTest("tag", "1.0.1", "1.0-SNAPSHOT", "git tag 1.0.0"));
 
-        assertVersion(new VersionTest("no-tags-no-pom", "1.0.0", null));
+        assertVersion(new VersionTest("no-tags-no-pom", "0.0.1", null));
 
         assertVersion(new VersionTest("tag-with-v", "1.0.1", "1.0-SNAPSHOT", "git tag v1.0.0"));
         assertVersion(new VersionTest("tag-with-v", "1.0.2", "1.0-SNAPSHOT", "git tag v1.0.0", "git tag v1.0.1"));
@@ -58,14 +58,14 @@ public class Fabric8CommandsVersionTest {
         Fabric8Commands step = new Fabric8Commands();
         step.setCurrentDir(dir);
 
-        step.sh("git init");
-        step.sh("echo Hello > ReadMe.md");
-        step.sh("git add *.md");
-        step.sh("git commit -m 'initial import'");
+        sh(step, "git init");
+        sh(step, "echo Hello > ReadMe.md");
+        sh(step, "git add *.md");
+        shIgnoreResult(step, "git commit -a -m initiaImport");
 
         String[] commands = test.getCommands();
         for (String command : commands) {
-            step.sh(command);
+            shIgnoreResult(step, command);
         }
 
         String pomVersion = test.getPomVersion();
@@ -83,6 +83,23 @@ public class Fabric8CommandsVersionTest {
         String newVersion = step.getNewVersionFromTag(pomVersion);
 
         assertThat(newVersion).describedAs("New version for dir " + dir + " pomVersion " + pomVersion).isEqualTo(test.getExpectedVersion());
+    }
+
+    protected static void sh(Fabric8Commands step, String command) {
+        try {
+            step.sh(command);
+        } catch (Exception e) {
+            System.out.println("Failed to run command " + command + " in " + step.getCurrentDir() + ". " + e);
+            e.printStackTrace();
+        }
+    }
+
+    protected static void shIgnoreResult(Fabric8Commands step, String command) {
+        try {
+            step.sh(command);
+        } catch (Exception e) {
+            System.out.println("Ignored error from command " + command + " " + e);
+        }
     }
 
     public static class VersionTest {

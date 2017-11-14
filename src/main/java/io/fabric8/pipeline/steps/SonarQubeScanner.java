@@ -39,7 +39,7 @@ public class SonarQubeScanner extends FunctionSupport implements Function<SonarQ
         final String scannerVersion = config.getScannerVersion();
 
         if (config.isRunSonarScanner()) {
-            Fabric8Commands flow = new Fabric8Commands();
+            Fabric8Commands flow = new Fabric8Commands(this);
             echo("Checking " + serviceName + " exists");
             if (flow.hasService(serviceName)) {
                 try {

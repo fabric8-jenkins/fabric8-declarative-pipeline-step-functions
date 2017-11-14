@@ -44,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Utils extends FunctionSupport {
+    public Utils(FunctionSupport parentStep) {
+        super(parentStep);
+    }
 
     public static String defaultNamespace(KubernetesClient kubernetesClient) {
         String namespace = kubernetesClient.getNamespace();
@@ -309,7 +312,7 @@ public class Utils extends FunctionSupport {
 
     @NonCPS
     public Build addAnnotationToBuild(final String annotation, final String value) {
-        io.fabric8.Fabric8Commands flow = new io.fabric8.Fabric8Commands();
+        Fabric8Commands flow = new Fabric8Commands(this);
         if (flow.isOpenShift()) {
             String buildName = getValidOpenShiftBuildName();
             echo("Adding annotation \'" + annotation + ": " + value + "\' to Build " + buildName);
@@ -381,7 +384,10 @@ public class Utils extends FunctionSupport {
 
     @NonCPS
     public Boolean isValidBuildName(final String buildName) {
-        io.fabric8.Fabric8Commands flow = new io.fabric8.Fabric8Commands();
+        if (Strings.isNullOrBlank(buildName)) {
+            return false;
+        }
+        Fabric8Commands flow = new Fabric8Commands(this);
         if (flow.isOpenShift()) {
             echo("Looking for matching Build " + buildName);
         }
@@ -585,7 +591,7 @@ public Object getDownstreamProjectOverrides(Object downstreamProject){
         }
 
 
-        io.fabric8.Fabric8Commands flow = new io.fabric8.Fabric8Commands();
+        Fabric8Commands flow = new Fabric8Commands(this);
         String project = getRepoName();
 
         List comments = flow.getIssueComments(project, id);
@@ -643,7 +649,7 @@ public Object getDownstreamProjectOverrides(Object downstreamProject){
             Jenkins activeInstance = Jenkins.getInstance();
             WorkflowJob job = (WorkflowJob) activeInstance.getItemByFullName(System.getenv("JOB_NAME"));
             WorkflowRun run = job.getBuildByNumber(Integer.parseInt(System.getenv("BUILD_NUMBER")));
-            Fabric8Commands flow = new Fabric8Commands();
+            Fabric8Commands flow = new Fabric8Commands(this);
             if (flow.isOpenShift()) {
                 Class clazz;
                 try {
@@ -661,8 +667,8 @@ public Object getDownstreamProjectOverrides(Object downstreamProject){
                     error("Failed to get openshift BuildCause name:", e);
                 }
             }
-        } catch (Exception e) {
-            error("Failed to get openshift build namne", e);
+        } catch (Throwable e) {
+            error("Failed to get openshift build name: " + e);
         }
         return null;
     }

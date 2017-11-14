@@ -22,13 +22,13 @@ import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Step;
 import org.apache.maven.model.Model;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import static io.fabric8.pipeline.steps.helpers.Systems.getEnvVar;
+import static io.fabric8.utils.Strings.notEmpty;
 
 /**
  * Declarative step function to perform a maven release
@@ -44,8 +44,8 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
     }
 
     public String apply(Arguments args) {
-        Fabric8Commands flow = new Fabric8Commands();
-        Utils utils = new Utils();
+        Fabric8Commands flow = new Fabric8Commands(this);
+        Utils utils = new Utils(this);
 
         boolean skipTests = args.isSkipTests();
         String version = args.getVersion();
@@ -71,18 +71,16 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
             error("Failed to find buildName", err);
         }
 
-
-        if (buildName != null && !buildName.isEmpty()) {
+        if (notEmpty(buildName)) {
             String buildUrl = System.getenv("BUILD_URL");
-            if (Strings.notEmpty(buildUrl)) {
+            if (notEmpty(buildUrl)) {
                 utils.addAnnotationToBuild("fabric8.io/jenkins.testReportUrl", buildUrl + "testReport");
             }
 
             String changeUrl = System.getenv("CHANGE_URL");
-            if (Strings.notEmpty(changeUrl)) {
+            if (notEmpty(changeUrl)) {
                 utils.addAnnotationToBuild("fabric8.io/jenkins.changeUrl", (String) changeUrl);
             }
-
 
             new BayesianScanner(this).apply(args.getBayesianScannerArguments());
         }
@@ -108,7 +106,7 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
                 if (model != null) {
                     String groupId = model.getGroupId();
                     String artifactId = model.getArtifactId();
-                    if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId)) {
+                    if (notEmpty(groupId) && notEmpty(artifactId)) {
                         String[] groupIds = groupId.split("\\.");
                         String user = groupIds[groupIds.length - 1].trim();
                         sh("docker tag " + user + "/" + artifactId + ":" + version + " " + registry + "/" + user + "/" + artifactId + ":" + version);

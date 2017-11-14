@@ -15,12 +15,10 @@
  */
 package io.fabric8;
 
+import io.fabric8.support.Tests;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.kohsuke.github.GHIssueComment;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +28,7 @@ public class UtilsTest {
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
-    protected Utils step = new Utils();
+    protected Utils step = Tests.createUtils(getClass());
 
     @Test
     public void testRepoName() throws Exception {
@@ -42,7 +40,7 @@ public class UtilsTest {
     protected void assertRepoName(String jobName, String expected) {
         environmentVariables.set("JOB_NAME", jobName);
 
-        String actual=  step.getRepoName();
+        String actual = step.getRepoName();
         assertThat(actual).describedAs("repoName for jobName: " + jobName).isEqualTo(expected);
 
     }

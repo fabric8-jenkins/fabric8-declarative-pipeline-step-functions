@@ -15,6 +15,7 @@
  */
 package io.fabric8;
 
+import io.fabric8.support.Tests;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  */
 public class Fabric8CommandsTest {
-    protected Fabric8Commands step = new Fabric8Commands();
+    protected Fabric8Commands step = Tests.createFabric8Commands(getClass());
     protected String mavenCentral = "http://central.maven.org/maven2";
 
     @Test
@@ -31,7 +32,7 @@ public class Fabric8CommandsTest {
 
         String groupId = "io.fabric8";
         String artifactId = "kubernetes-client";
-        String ext= "jar";
+        String ext = "jar";
         assertArtifactInRepo(mavenCentral, groupId, artifactId, version, ext);
     }
 
@@ -52,15 +53,15 @@ public class Fabric8CommandsTest {
     }
 
 
-    public  String assertGetVersion(String repo, String artifact) {
+    public String assertGetVersion(String repo, String artifact) {
         String version = step.getVersion(repo, artifact);
 
         System.out.println("latest " + repo + " version of " + artifact + " is " + version);
         assertThat(version).describedAs(repo + " version of artifact " + artifact).isNotEmpty();
         return version;
     }
-    
-    public  String assertGetMavenCentralVersion(String artifact) {
+
+    public String assertGetMavenCentralVersion(String artifact) {
         String version = step.getMavenCentralVersion(artifact);
 
         System.out.println("latest maven central version of " + artifact + " is " + version);
@@ -68,7 +69,7 @@ public class Fabric8CommandsTest {
         return version;
     }
 
-    public  String assertGetReleaseVersion(String artifact) {
+    public String assertGetReleaseVersion(String artifact) {
         String version = step.getReleaseVersion(artifact);
 
         System.out.println("latest release version of " + artifact + " is " + version);

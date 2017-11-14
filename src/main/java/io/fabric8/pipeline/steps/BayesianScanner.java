@@ -38,8 +38,8 @@ public class BayesianScanner extends FunctionSupport implements Function<Bayesia
     public String apply(Arguments config) {
         final String serviceName = config.getServiceName();
         if (config.isRunBayesianScanner()) {
-            Fabric8Commands flow = new Fabric8Commands();
-            final Utils utils = new Utils();
+            Fabric8Commands flow = new Fabric8Commands(this);
+            final Utils utils = new Utils(this);
             echo("Checking " + serviceName + " exists");
             if (flow.hasService(serviceName)) {
                 try {

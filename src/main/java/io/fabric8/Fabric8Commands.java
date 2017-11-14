@@ -54,6 +54,11 @@ import static io.fabric8.Utils.defaultNamespace;
 import static java.lang.Integer.parseInt;
 
 public class Fabric8Commands extends FunctionSupport {
+    private boolean debugSemVerReleaseVersion = false;
+
+    public Fabric8Commands(FunctionSupport parentStep) {
+        super(parentStep);
+    }
 
     public static boolean hasGitHubEnvVars() {
         String user = System.getenv(EnvironmentVariableNames.GITHUB_USER);
@@ -87,6 +92,13 @@ public class Fabric8Commands extends FunctionSupport {
         }
     }
 
+    public boolean isDebugSemVerReleaseVersion() {
+        return debugSemVerReleaseVersion;
+    }
+
+    public void setDebugSemVerReleaseVersion(boolean debugSemVerReleaseVersion) {
+        this.debugSemVerReleaseVersion = debugSemVerReleaseVersion;
+    }
 
     public String swizzleImageName(Object text, final Object match, final Object replace) {
         return Pattern.compile("image: " + match + ":(.*)").matcher((CharSequence) text).replaceFirst("image: " + replace);
@@ -310,85 +322,18 @@ public class Fabric8Commands extends FunctionSupport {
     }
 
     public String getNewVersionFromTag(String pomVersion) throws IOException {
-        //return shOutput("semver-release-version --folder " + getCurrentDir().getPath()).trim();
-        return shOutput("semver-release-number");
-/*        final String version = "1.0.0";
-
-        // Set known prerelease prefixes, needed for the proper sort order
-        // in the next command
-        execBashAndGetOutput("git config versionsort.prereleaseSuffix -RC");
-        execBashAndGetOutput("git config versionsort.prereleaseSuffix -M");
-
-        // if the repo has no tags this command will fail
-        execBashAndGetOutput("git tag --sort version:refname | tail -1 > version.tmp");
-
-        String tag = readFile("version.tmp").trim();
-        if (Strings.isNullOrBlank(tag)) {
-            echo("no existing tag found using version " + version);
-            return version;
+        String debugArg = isDebugSemVerReleaseVersion() ? "  --debug" : "";
+        String text = shOutput("semver-release-number --folder " + getCurrentDir().getPath() + debugArg).trim();
+        String[] lines = text.split("\n");
+        int last = lines.length - 1;
+        if (last < 0) {
+            error("No version returned from semver-release-number: " + text);
+            return null;
         }
-
-        echo("Testing to see if version " + tag + " is semver compatible");
-
-        Pattern semVerRegex = Pattern.compile("(?i)\\bv?(?<major>0|[1-9]\\d*)(?:\\.(?<minor>0|[1-9]\\d*)(?:\\.(?<patch>0|[1-9]\\d*))?)?(?:-(?<prerelease>[\\da-z\\-]+(?:\\.[\\da-z\\-]+)*))?(?:\\+(?<build>[\\da-z\\-]+(?:\\.[\\da-z\\-]+)*))?\\b");
-        Pattern pomRegex = Pattern.compile("(?i)\\bv?(?<major>0|[1-9]\\d*)(?:\\.(?<minor>0|[1-9]\\d*)(?:\\.(?<patch>0|[1-9]\\d*))?)?(?:-(?<prerelease>[\\da-z\\-]+(?:\\.[\\da-z\\-]+)*))?(?:\\+(?<build>[\\da-z\\-]+(?:\\.[\\da-z\\-]+)*))?\\b");
-
-        Matcher semver = semVerRegex.matcher(tag);
-        if (semver.matches()) {
-            echo("Version " + tag + " is semver compatible");
-
-            int majorVersion = parseInt(semver.group("major"));
-            int minorVersion = parseInt(semver.group("minor"));
-            int patchVersion = parseInt(semver.group("patch")) + 1;
-
-            echo("Testing to see if current POM version " + pomVersion + " is semver compatible");
-
-            Matcher pomSemver = pomRegex.matcher(pomVersion.trim());
-            if (pomSemver.matches()) {
-                echo("Current POM version " + pomVersion + " is semver compatible");
-
-                int pomMajorVersion = parseInt(pomSemver.group("major"));
-                int pomMinorVersion = parseInt(pomSemver.group("minor"));
-                int pomPatchVersion = parseInt(pomSemver.group("patch")) + 1;
-
-
-                if (pomMajorVersion > majorVersion ||
-                        (pomMajorVersion == majorVersion &&
-                                (pomMinorVersion > minorVersion) || (pomMinorVersion == minorVersion && pomPatchVersion > patchVersion)
-                        )
-                        ) {
-                    majorVersion = pomMajorVersion;
-                    minorVersion = pomMinorVersion;
-                    patchVersion = pomPatchVersion;
-                }
-            }
-
-
-            final String newVersion = "" + majorVersion + "." + minorVersion + "." + patchVersion;
-            echo("New version is " + newVersion);
-            return newVersion;
-        } else {
-            echo("Version is not semver compatible");
-
-            // strip the v prefix from the tag so we can use in a maven version number
-            String previousReleaseVersion = Strings.stripPrefix(tag, "v");
-            echo("Previous version found " + previousReleaseVersion);
-
-            // if there's an int as the version then turn it into a major.minor.micro version
-            if (NumberHelpers.isInteger(previousReleaseVersion)) {
-                return previousReleaseVersion + ".0.1";
-            } else {
-                int idx = previousReleaseVersion.lastIndexOf('.');
-                if (idx <= 0) {
-                    error("found invalid latest tag [" + previousReleaseVersion + "] set to major.minor.micro to calculate next release version");
-                    return null;
-                }
-
-                String text = previousReleaseVersion.substring(idx + 1);
-                int nextVersionNumber = parseInt(text) + 1;
-                return previousReleaseVersion.substring(0, idx + 1) + nextVersionNumber;
-            }
-        }*/
+        for (int i = 0; i < last; i++) {
+            getLogger().info("semver-release-number> " + lines[i]);
+        }
+        return lines[last];
     }
 
     public String getNewVersionFromTag() throws IOException {
@@ -1153,6 +1098,8 @@ final Object openshiftYaml=invokeMethod("findFiles",new Object[]{map);
  *
  * @param name the name of the namespace
  * @return true if the delete was successful
+ * <p>
+ * Should be called after checkout scm
  * <p>
  * Should be called after checkout scm
  * <p>

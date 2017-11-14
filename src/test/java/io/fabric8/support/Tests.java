@@ -16,6 +16,9 @@
 package io.fabric8.support;
 
 
+import io.fabric8.DirStep;
+import io.fabric8.Fabric8Commands;
+import io.fabric8.Utils;
 import io.fabric8.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,5 +105,27 @@ public class Tests {
         }
         testDataDir.mkdirs();
         return testDataDir;
+    }
+
+    /**
+     * Returns a newly created Fabric8Commands step
+     */
+    public static Fabric8Commands createFabric8Commands(Class<?> clazz) {
+        return new Fabric8Commands(createDirStep(clazz));
+    }
+
+    /**
+     * Returns a newly created Utils step
+     */
+    public static Utils createUtils(Class<?> clazz) {
+        return new Utils(createDirStep(clazz));
+    }
+
+    /**
+     * Returns a test DirStep
+     */
+    public static DirStep createDirStep(Class<?> clazz) {
+        File testWorkDir = Tests.getCleanWorkDir(clazz);
+        return new DirStep(testWorkDir);
     }
 }

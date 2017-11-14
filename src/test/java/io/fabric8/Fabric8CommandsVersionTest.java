@@ -18,7 +18,6 @@ package io.fabric8;
 import io.fabric8.support.Tests;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -29,11 +28,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  */
 public class Fabric8CommandsVersionTest {
-    protected File testWorkDir;
+    protected Fabric8Commands step = Tests.createFabric8Commands(getClass());
 
-    @Before
-    public void init() {
-        testWorkDir = Tests.getCleanWorkDir(getClass());
+    protected static void sh(Fabric8Commands step, String command) {
+        try {
+            step.sh(command);
+        } catch (Exception e) {
+            System.out.println("Failed to run command " + command + " in " + step.getCurrentDir() + ". " + e);
+            e.printStackTrace();
+        }
+    }
+
+    protected static void shIgnoreResult(Fabric8Commands step, String command) {
+        try {
+            step.sh(command);
+        } catch (Exception e) {
+            System.out.println("Ignored error from command " + command + " " + e);
+        }
     }
 
     @Test
@@ -52,11 +63,7 @@ public class Fabric8CommandsVersionTest {
     }
 
     protected void assertVersion(VersionTest test) throws IOException {
-        File dir = new File(testWorkDir, test.getName());
-        dir.mkdirs();
-
-        Fabric8Commands step = new Fabric8Commands();
-        step.setCurrentDir(dir);
+        File dir = step.getCurrentDir();
 
         sh(step, "git init");
         sh(step, "echo Hello > ReadMe.md");
@@ -83,23 +90,6 @@ public class Fabric8CommandsVersionTest {
         String newVersion = step.getNewVersionFromTag(pomVersion);
 
         assertThat(newVersion).describedAs("New version for dir " + dir + " pomVersion " + pomVersion).isEqualTo(test.getExpectedVersion());
-    }
-
-    protected static void sh(Fabric8Commands step, String command) {
-        try {
-            step.sh(command);
-        } catch (Exception e) {
-            System.out.println("Failed to run command " + command + " in " + step.getCurrentDir() + ". " + e);
-            e.printStackTrace();
-        }
-    }
-
-    protected static void shIgnoreResult(Fabric8Commands step, String command) {
-        try {
-            step.sh(command);
-        } catch (Exception e) {
-            System.out.println("Ignored error from command " + command + " " + e);
-        }
     }
 
     public static class VersionTest {

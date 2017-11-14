@@ -40,7 +40,7 @@ import java.util.concurrent.Callable;
 public class FunctionSupport {
     private Logger logger = DefaultLogger.getInstance();
     private File currentDir = new File(".");
-    private Map<String,String> env = new HashMap<>();
+    private Map<String, String> env = new HashMap<>();
 
     public FunctionSupport() {
     }

@@ -20,8 +20,11 @@ import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Logger;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Map;
 
@@ -61,21 +64,11 @@ public class ProcessHelper {
     }
 
     public static int runCommand(File dir, Logger logger, Map<String, String> environmentVariables, String[] commands) {
-        File outputFile = new File(dir, "target/steps.log");
-        File errorFile = new File(dir, "target/steps.err");
-        try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
-            outputFile.getParentFile().mkdirs();
-            int answer = runCommand(dir, logger, environmentVariables, outputFile, errorFile, commands);
-            if (answer != 0) {
-                logger.warn("Failed to run " + String.join(" ", commands));
-            }
-            logOutput(logger, outputFile, false);
-            logOutput(logger, errorFile, true);
-            return answer;
-        } catch (IOException e) {
-            logger.warn("Caught: " + e, e);
-            return -1;
-        }
+        ProcessBuilder builder = new ProcessBuilder(commands);
+        builder.directory(dir);
+        applyEnvironmentVariables(builder, environmentVariables);
+        return doRunCommandAndLogOutput(logger, builder, commands);
+
     }
 
     public static boolean runCommandAndLogOutput(Logger log, File dir, String... commands) {
@@ -148,8 +141,9 @@ public class ProcessHelper {
     }
 
     protected static int doRunCommand(Logger logger, ProcessBuilder builder, String[] commands) {
-        String line = String.join(" ", commands);
+        String line = getCommandLine(commands);
         try {
+            logger.info("$> " + line);
             Process process = builder.start();
             int exitCode = process.waitFor();
             if (exitCode != 0) {
@@ -163,5 +157,49 @@ public class ProcessHelper {
         }
         return 1;
     }
+
+    protected static int doRunCommandAndLogOutput(Logger logger, ProcessBuilder builder, String[] commands) {
+        String line = getCommandLine(commands);
+        try {
+            logger.info("$> " + line);
+            Process process = builder.start();
+            processOutput(process.getInputStream(), logger, false, "output of command: " + line);
+            processOutput(process.getErrorStream(), logger, true, "errors of command: " + line);
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                logger.warn("Failed to run command " + line + " in " + builder.directory() + " : exit " + exitCode);
+            }
+            return exitCode;
+        } catch (IOException e) {
+            logger.warn("Failed to run command " + line + " in " + builder.directory() + " : error " + e);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        return 1;
+    }
+
+    protected static String getCommandLine(String[] commands) {
+        return Strings.stripPrefix(String.join(" ", commands), "bash -c ");
+    }
+
+    protected static void processOutput(InputStream inputStream, Logger logger, boolean error, String description) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) break;
+                if (error) {
+                    logger.error(line);
+                } else {
+                    logger.info(line);
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to process " + description + ": " + e, e);
+            throw e;
+        }
+    }
+
 
 }

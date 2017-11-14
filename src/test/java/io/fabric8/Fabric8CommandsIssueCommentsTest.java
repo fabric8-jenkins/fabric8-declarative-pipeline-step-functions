@@ -15,6 +15,7 @@
  */
 package io.fabric8;
 
+import io.fabric8.support.Tests;
 import org.junit.Test;
 import org.kohsuke.github.GHIssueComment;
 
@@ -27,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  */
 public class Fabric8CommandsIssueCommentsTest {
-    Fabric8Commands step = new Fabric8Commands();
+    protected Fabric8Commands step = Tests.createFabric8Commands(getClass());
 
     @Test
     public void testIssueComments() throws Exception {
@@ -40,7 +41,7 @@ public class Fabric8CommandsIssueCommentsTest {
         List<GHIssueComment> comments = step.getIssueComments(project, issueNumber);
         assertThat(comments).describedAs("Issue comments for project " + project + " issue " + issueNumber).isNotEmpty();
         for (GHIssueComment comment : comments) {
-            System.out.println("@" + comment.getUser().getLogin() + ": "+ comment.getBody());
+            System.out.println("@" + comment.getUser().getLogin() + ": " + comment.getBody());
         }
 
     }

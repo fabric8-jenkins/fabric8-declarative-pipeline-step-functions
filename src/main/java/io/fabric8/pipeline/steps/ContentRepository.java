@@ -32,7 +32,7 @@ public class ContentRepository extends FunctionSupport implements Function<Conte
     public String apply(Arguments config) {
         final String serviceName = config.getServiceName();
         if (config.isUseContentRepository()) {
-            Fabric8Commands flow = new Fabric8Commands();
+            Fabric8Commands flow = new Fabric8Commands(this);
             echo("Checking " + serviceName + " exists");
             if (flow.hasService(serviceName)) {
                 try {

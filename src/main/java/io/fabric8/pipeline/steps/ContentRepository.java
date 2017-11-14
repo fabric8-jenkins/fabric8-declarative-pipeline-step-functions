@@ -17,6 +17,7 @@ package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
+import io.jenkins.functions.Argument;
 
 import java.util.function.Function;
 
@@ -53,7 +54,9 @@ public class ContentRepository extends FunctionSupport implements Function<Conte
     }
 
     public static class Arguments {
+        @Argument
         private String serviceName = "content-repository";
+        @Argument
         private boolean useContentRepository = true;
 
         public String getServiceName() {

@@ -20,6 +20,7 @@ import io.fabric8.FunctionSupport;
 import io.fabric8.Utils;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.utils.Strings;
+import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 import org.apache.maven.model.Model;
 
@@ -134,12 +135,19 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
     }
 
     public static class Arguments {
+        @Argument
         private boolean skipTests;
+        @Argument
         private String version;
+        @Argument
         private JUnitResults.Arguments JUnitArguments = new JUnitResults.Arguments();
+        @Argument
         private BayesianScanner.Arguments bayesianScannerArguments = new BayesianScanner.Arguments();
+        @Argument
         private SonarQubeScanner.Arguments sonarQubeArguments = new SonarQubeScanner.Arguments();
+        @Argument
         private ContentRepository.Arguments contentRepositoryArguments = new ContentRepository.Arguments();
+        @Argument
         private ReadMavenPom.Arguments readMavenPomArguments = new ReadMavenPom.Arguments();
 
         public boolean isSkipTests() {

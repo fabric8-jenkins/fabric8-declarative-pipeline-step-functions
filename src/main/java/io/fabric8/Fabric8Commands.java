@@ -28,6 +28,7 @@ import io.fabric8.utils.Strings;
 import io.fabric8.utils.XmlUtils;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
+import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -68,28 +69,53 @@ public class Fabric8Commands extends FunctionSupport {
         return Strings.notEmpty(githubToken) || (Strings.notEmpty(user) && Strings.notEmpty(password));
     }
 
-    public static GitHub createGitHub(String githubToken) {
+    public GitHub createGitHub(String githubToken) {
         String user = System.getenv(EnvironmentVariableNames.GITHUB_USER);
         String password = System.getenv(EnvironmentVariableNames.GITHUB_PASSWORD);
         final GitHubBuilder ghb = new GitHubBuilder();
         if (Strings.isNullOrBlank(githubToken)) {
             githubToken = System.getenv(EnvironmentVariableNames.GITHUB_TOKEN);
         }
-        if (Strings.notEmpty(githubToken)) {
-            if (Strings.notEmpty(user)) {
-                ghb.withOAuthToken(user, githubToken);
-            } else {
-                ghb.withOAuthToken(githubToken);
-            }
-        }
         if (Strings.isNotBlank(user) && Strings.isNotBlank(password)) {
             ghb.withPassword(user, password);
+        } else {
+            if (Strings.isNullOrBlank(githubToken)) {
+                githubToken = loadDefaultGithubToken();
+            }
+            if (Strings.notEmpty(githubToken)) {
+                if (Strings.notEmpty(user)) {
+                    ghb.withOAuthToken(user, githubToken);
+                } else {
+                    ghb.withOAuthToken(githubToken);
+                }
+            }
         }
         try {
             return ghb.build();
         } catch (Exception e) {
             throw new FailedBuildException("Could not connect to github", e);
         }
+    }
+
+    private String loadDefaultGithubToken() {
+        final String tokenPath = "/home/jenkins/.apitoken/hub";
+        File file = new File(tokenPath);
+        if (file.isFile() && file.exists()) {
+            String githubToken;
+            try {
+                githubToken = IOHelpers.readFully(file);
+            } catch (IOException e) {
+                error("Failed to load GitHub token from " + file, e);
+                return null;
+            }
+            githubToken = githubToken.trim();
+            if (Strings.isNullOrBlank(githubToken)) {
+                error("No GitHub token found in " + file);
+            } else {
+                return githubToken;
+            }
+        }
+        return null;
     }
 
     public boolean isDebugSemVerReleaseVersion() {
@@ -565,6 +591,25 @@ TODO
     }
 
 
+    public GHPullRequest createPullRequest(final String message, final String project, final String branch) {
+        GitHub gitHub = createGitHub(null);
+        GHRepository repository = null;
+        try {
+            repository = gitHub.getRepository(project);
+        } catch (Exception e) {
+            throw new FailedBuildException("Could not find repository " + project, e);
+        }
+        GHPullRequest pr = null;
+        try {
+            pr = repository.createPullRequest(message, branch, "master", "");
+        } catch (IOException e) {
+            throw new FailedBuildException("Failed to create PullRequest on " + project + " due to " + e, e);
+        }
+        if (pr != null) {
+            echo("Created PullRequest " + pr.getHtmlUrl());
+        }
+        return pr;
+    }
 }
 
         /*

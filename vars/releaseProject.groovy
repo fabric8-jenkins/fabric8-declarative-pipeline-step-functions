@@ -1,4 +1,6 @@
 #!/usr/bin/groovy
+import io.fabric8.pipeline.steps.PromoteArtifacts
+
 def call(body) {
     // evaluate the body block, and collect configuration into the object
     def config = [:]
@@ -12,7 +14,7 @@ def call(body) {
     def tagDockerImages = config.extraImagesToTag ?: []
     def container = config.containerName ?: 'maven'
 
-    String pullRequestId = promoteArtifacts {
+    String pullRequestId = PromoteArtifacts {
       projectStagingDetails = config.stagedProject
       project = projectName
       useGitTagForNextVersion = config.useGitTagForNextVersion

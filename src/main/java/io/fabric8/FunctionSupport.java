@@ -202,4 +202,15 @@ public class FunctionSupport {
         File projectDir = createFile(dirName);
         return dir(projectDir, callable);
     }
+
+    /**
+     * Specifies the container name to run commands inside
+     */
+    protected <T> T container(String containerName, Callable<T> callable) {
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            throw new FailedBuildException(e);
+        }
+    }
 }

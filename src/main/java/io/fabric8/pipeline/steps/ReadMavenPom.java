@@ -17,6 +17,7 @@ package io.fabric8.pipeline.steps;
 
 import io.fabric8.FunctionSupport;
 import io.fabric8.utils.Strings;
+import io.jenkins.functions.Argument;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -70,6 +71,7 @@ public class ReadMavenPom extends FunctionSupport {
 
     public static class Arguments {
         private File file;
+        @Argument
         private String fileName;
 
         public Arguments() {

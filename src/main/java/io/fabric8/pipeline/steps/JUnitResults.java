@@ -16,6 +16,7 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.FunctionSupport;
+import io.jenkins.functions.Argument;
 
 import java.io.File;
 import java.io.Serializable;
@@ -61,6 +62,7 @@ public class JUnitResults extends FunctionSupport implements Function<JUnitResul
     }
 
     public static class Arguments {
+        @Argument
         private boolean archiveTestResults = true;
 
         public boolean isArchiveTestResults() {

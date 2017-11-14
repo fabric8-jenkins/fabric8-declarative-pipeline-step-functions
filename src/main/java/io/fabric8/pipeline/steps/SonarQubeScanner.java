@@ -18,6 +18,7 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.jenkins.functions.Argument;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -78,9 +79,13 @@ public class SonarQubeScanner extends FunctionSupport implements Function<SonarQ
     }
 
     public static class Arguments {
+        @Argument
         private String serviceName = "sonarqube";
+        @Argument
         private int servicePort = 9000;
+        @Argument
         private String scannerVersion = "2.8";
+        @Argument
         private boolean runSonarScanner = true;
 
         public String getServiceName() {

@@ -19,6 +19,7 @@ import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.fabric8.Utils;
 import io.fabric8.pipeline.steps.helpers.BooleanHelpers;
+import io.jenkins.functions.Argument;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import java.util.LinkedHashMap;
@@ -75,7 +76,9 @@ public class BayesianScanner extends FunctionSupport implements Function<Bayesia
     }
 
     public static class Arguments {
+        @Argument
         private String serviceName = "bayesian-link";
+        @Argument
         private boolean runBayesianScanner = true;
 
         public String getServiceName() {

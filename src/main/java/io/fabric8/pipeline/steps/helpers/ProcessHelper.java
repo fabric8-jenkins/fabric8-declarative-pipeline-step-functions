@@ -18,8 +18,7 @@ package io.fabric8.pipeline.steps.helpers;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.jenkins.functions.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,86 +28,53 @@ import java.util.Map;
 /**
  */
 public class ProcessHelper {
-    private static final transient Logger LOG = LoggerFactory.getLogger(ProcessHelper.class);
 
-    public static int runCommand(File dir, String... commands) {
-        return runCommand(dir, Collections.EMPTY_MAP, true, commands);
-    }
-
-    public static int runCommandIgnoreOutput(File dir, Map<String, String> environmentVariables, String... commands) {
-        return runCommand(dir, environmentVariables, false, commands);
-    }
-
-    public static int runCommandIgnoreOutput(File dir, String... commands) {
-        return runCommand(dir, Collections.EMPTY_MAP, false, commands);
-    }
-
-    public static int runCommand(File dir, Map<String, String> environmentVariables, boolean inheritIO, String... commands) {
-        ProcessBuilder builder = new ProcessBuilder(commands);
-        builder.directory(dir);
-        applyEnvironmentVariables(builder, environmentVariables);
-        if (inheritIO) {
-            builder.inheritIO();
-        }
-        return doRunCommand(builder, commands);
-    }
-
-    public static String runCommandCaptureOutput(File dir, String... commands) throws IOException {
-        return runCommandCaptureOutput(dir, Collections.EMPTY_MAP, commands);
-    }
-
-    public static String runCommandCaptureOutput(File dir, Map<String, String> environmentVariables, String... commands) throws IOException {
+    public static String runCommandCaptureOutput(File dir, Logger logger, Map<String, String> environmentVariables, String... commands) throws IOException {
         File outputFile;
         File errorFile;
         try {
-            outputFile = File.createTempFile("updatebot-", ".log");
-            errorFile = File.createTempFile("updatebot-", ".err");
+            outputFile = File.createTempFile("steps-", ".log");
+            errorFile = File.createTempFile("steps-", ".err");
         } catch (IOException e) {
             throw new IOException("Failed to create temporary files " + e, e);
         }
 
-        int result = runCommand(dir, outputFile, errorFile, commands);
-        String output = loadFile(outputFile);
-        String err = loadFile(errorFile);
-        logOutput(err, true);
+        int result = runCommand(dir, logger, environmentVariables, outputFile, errorFile, commands);
+        String output = loadFile(logger, outputFile);
+        String err = loadFile(logger, errorFile);
+        logOutput(logger, err, true);
         if (result != 0) {
-            LOG.warn("Failed to run commands " + String.join(" ", commands) + " result: " + result);
-            logOutput(output, false);
+            logger.warn("Failed to run commands " + String.join(" ", commands) + " result: " + result);
+            logOutput(logger, output, false);
             throw new IOException("Failed to run commands " + String.join(" ", commands) + " result: " + result);
         }
         return output;
     }
 
-    public static int runCommand(File dir, File outputFile, File errorFile, String... commands) {
-        return runCommand(dir, Collections.EMPTY_MAP, outputFile, errorFile, commands);
-    }
-
-    public static int runCommand(File dir, Map<String, String> environmentVariables, File outputFile, File errorFile, String... commands) {
+    public static int runCommand(File dir, Logger logger, Map<String, String> environmentVariables, File outputFile, File errorFile, String... commands) {
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
         applyEnvironmentVariables(builder, environmentVariables);
         builder.redirectOutput(outputFile);
         builder.redirectError(errorFile);
-        return doRunCommand(builder, commands);
+        return doRunCommand(logger, builder, commands);
     }
 
-
-    public static boolean runCommandAndLogOutput(File dir, String... commands) {
-        File outputFile = new File(dir, "target/updatebot.log");
-        File errorFile = new File(dir, "target/updatebot.err");
+    public static int runCommand(File dir, Logger logger, Map<String, String> environmentVariables, String[] commands) {
+        File outputFile = new File(dir, "target/steps.log");
+        File errorFile = new File(dir, "target/steps.err");
         try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
             outputFile.getParentFile().mkdirs();
-            boolean answer = true;
-            if (runCommand(dir, outputFile, errorFile, commands) != 0) {
-                LOG.warn("Failed to run " + String.join(" ", commands));
-                answer = false;
+            int answer = runCommand(dir, logger, environmentVariables, outputFile, errorFile, commands);
+            if (answer != 0) {
+                logger.warn("Failed to run " + String.join(" ", commands));
             }
-            logOutput(outputFile, false);
-            logOutput(errorFile, true);
+            logOutput(logger, outputFile, false);
+            logOutput(logger, errorFile, true);
             return answer;
         } catch (IOException e) {
-            LOG.warn("Caught: " + e, e);
-            return false;
+            logger.warn("Caught: " + e, e);
+            return -1;
         }
     }
 
@@ -124,44 +90,27 @@ public class ProcessHelper {
         return runCommandAndLogOutput(log, dir, environmentVariables, true, commands);
     }
 
-    public static boolean runCommandAndLogOutput(Logger log, File dir, Map<String, String> environmentVariables, boolean useError, String... commands) {
+    public static boolean runCommandAndLogOutput(Logger logger, File dir, Map<String, String> environmentVariables, boolean useError, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
         File errorFile = new File(dir, "target/updatebot.err");
         try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
             outputFile.getParentFile().mkdirs();
             boolean answer = true;
-            if (runCommand(dir, environmentVariables, outputFile, errorFile, commands) != 0) {
-                LOG.error("Failed to run " + String.join(" ", commands));
+            if (runCommand(dir, logger, environmentVariables, outputFile, errorFile, commands) != 0) {
+                logger.error("Failed to run " + String.join(" ", commands));
                 answer = false;
             }
-            logOutput(log, outputFile, false);
-            logOutput(log, errorFile, useError);
+            logOutput(logger, outputFile, false);
+            logOutput(logger, errorFile, useError);
             return answer;
         } catch (IOException e) {
-            LOG.warn("Caught: " + e, e);
+            logger.warn("Caught: " + e, e);
             return false;
         }
     }
 
     public static void logOutput(Logger log, File file, boolean error) {
-        logOutput(log, loadFile(file), error);
-    }
-
-    public static void logOutput(File file, boolean error) {
-        logOutput(loadFile(file), error);
-    }
-
-    protected static void logOutput(String output, boolean error) {
-        if (Strings.notEmpty(output)) {
-            String[] lines = output.split("\n");
-            for (String line : lines) {
-                if (error) {
-                    LOG.error(line);
-                } else {
-                    LOG.info(line);
-                }
-            }
-        }
+        logOutput(log, loadFile(log, file), error);
     }
 
     protected static void logOutput(Logger log, String output, boolean error) {
@@ -177,13 +126,13 @@ public class ProcessHelper {
         }
     }
 
-    protected static String loadFile(File file) {
+    protected static String loadFile(Logger logger, File file) {
         String output = null;
         if (Files.isFile(file)) {
             try {
                 output = IOHelpers.readFully(file);
             } catch (IOException e) {
-                LOG.error("Failed to load " + file + ". " + e, e);
+                logger.error("Failed to load " + file + ". " + e, e);
             }
         }
         return output;
@@ -198,20 +147,21 @@ public class ProcessHelper {
         }
     }
 
-    protected static int doRunCommand(ProcessBuilder builder, String[] commands) {
+    protected static int doRunCommand(Logger logger, ProcessBuilder builder, String[] commands) {
         String line = String.join(" ", commands);
         try {
             Process process = builder.start();
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : exit " + exitCode);
+                logger.warn("Failed to run command " + line + " in " + builder.directory() + " : exit " + exitCode);
             }
             return exitCode;
         } catch (IOException e) {
-            LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : error " + e);
+            logger.warn("Failed to run command " + line + " in " + builder.directory() + " : error " + e);
         } catch (InterruptedException e) {
             // ignore
         }
         return 1;
     }
+
 }

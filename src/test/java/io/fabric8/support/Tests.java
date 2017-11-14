@@ -100,6 +100,7 @@ public class Tests {
         } else {
             Files.recursiveDelete(testDataDir);
         }
+        testDataDir.mkdirs();
         return testDataDir;
     }
 }

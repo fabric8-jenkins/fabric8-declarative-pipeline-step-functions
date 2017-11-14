@@ -18,12 +18,17 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.fabric8.Utils;
+import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Step;
 import org.apache.maven.model.Model;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+
+import static io.fabric8.pipeline.steps.helpers.Systems.getEnvVar;
 
 /**
  * Declarative step function to perform a maven release
@@ -44,8 +49,15 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
 
         boolean skipTests = args.isSkipTests();
         String version = args.getVersion();
+        if (Strings.isNullOrBlank(version)) {
+            try {
+                version = flow.getNewVersionFromTag();
+            } catch (IOException e) {
+                throw new FailedBuildException("Could not find release version due to " + e, e);
+            }
+        }
 
-        sh("git checkout -b " + System.getenv("JOB_NAME") + "-" + version);
+        sh("git checkout -b " + getEnvVar("JOB_NAME", "cd-release") + "-" + version);
         sh("mvn org.codehaus.mojo:versions-maven-plugin:2.2:set -U -DnewVersion=" + version);
         sh("mvn clean -B -e -U deploy -Dmaven.test.skip=" + skipTests + " -P openshift");
 

@@ -366,7 +366,7 @@ public class Utils extends FunctionSupport {
 
         // if the repo has no tags this command will fail
         try {
-            String answer = sh("git tag --sort version:refname | tail -1").trim();
+            String answer = shOutput("git tag --sort version:refname | tail -1").trim();
             if (Strings.isNullOrBlank(answer)) {
                 error("no release tag found");
             } else if (answer.startsWith("v")) {
@@ -639,26 +639,30 @@ public Object getDownstreamProjectOverrides(Object downstreamProject){
 
     @NonCPS
     public String getOpenShiftBuildName() {
-        Jenkins activeInstance = Jenkins.getInstance();
-        WorkflowJob job = (WorkflowJob) activeInstance.getItemByFullName(System.getenv("JOB_NAME"));
-        WorkflowRun run = job.getBuildByNumber(Integer.parseInt(System.getenv("BUILD_NUMBER")));
-        io.fabric8.Fabric8Commands flow = new io.fabric8.Fabric8Commands();
-        if (flow.isOpenShift()) {
-            Class clazz;
-            try {
-                clazz = Thread.currentThread().getContextClassLoader().loadClass("io.fabric8.jenkins.openshiftsync.BuildCause");
-            } catch (ClassNotFoundException e) {
-                error("Failed to load class BuildCause " + e);
-                return null;
-            }
-            try {
-                Object cause = run.getCause(clazz);
-                if (cause != null) {
-                    return (String) PropertyUtils.getProperty(cause, "name");
+        try {
+            Jenkins activeInstance = Jenkins.getInstance();
+            WorkflowJob job = (WorkflowJob) activeInstance.getItemByFullName(System.getenv("JOB_NAME"));
+            WorkflowRun run = job.getBuildByNumber(Integer.parseInt(System.getenv("BUILD_NUMBER")));
+            Fabric8Commands flow = new Fabric8Commands();
+            if (flow.isOpenShift()) {
+                Class clazz;
+                try {
+                    clazz = Thread.currentThread().getContextClassLoader().loadClass("io.fabric8.jenkins.openshiftsync.BuildCause");
+                } catch (ClassNotFoundException e) {
+                    error("Failed to load class BuildCause", e);
+                    return null;
                 }
-            } catch (Exception e) {
-                error("Failed to get openshift BuildCause name: " + e);
+                try {
+                    Object cause = run.getCause(clazz);
+                    if (cause != null) {
+                        return (String) PropertyUtils.getProperty(cause, "name");
+                    }
+                } catch (Exception e) {
+                    error("Failed to get openshift BuildCause name:", e);
+                }
             }
+        } catch (Exception e) {
+            error("Failed to get openshift build namne", e);
         }
         return null;
     }

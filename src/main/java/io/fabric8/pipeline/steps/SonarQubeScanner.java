@@ -59,7 +59,8 @@ public class SonarQubeScanner extends FunctionSupport implements Function<SonarQ
 
                             echo("executing sonar scanner");
 
-                            return sh("java -jar " + localScanner + "  -Dsonar.host.url=http://" + serviceName + ":" + port + "  -Dsonar.projectKey=" + System.getenv("JOB_NAME") + " -Dsonar.sources=" + srcDirectory);
+                            sh("java -jar " + localScanner + "  -Dsonar.host.url=http://" + serviceName + ":" + port + "  -Dsonar.projectKey=" + System.getenv("JOB_NAME") + " -Dsonar.sources=" + srcDirectory);
+                            return null;
                         }
                     });
 

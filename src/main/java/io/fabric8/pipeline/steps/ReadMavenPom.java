@@ -38,6 +38,14 @@ public class ReadMavenPom extends FunctionSupport {
         super(parentStep);
     }
 
+    public Model apply() throws IOException, XmlPullParserException {
+        return apply(new Arguments());
+    }
+
+    public Model apply(String fileName) throws IOException, XmlPullParserException {
+        return apply(new Arguments(fileName));
+    }
+
     public Model apply(Arguments arguments) throws IOException, XmlPullParserException {
         File file = arguments.getFile();
         if (file == null) {
@@ -63,6 +71,13 @@ public class ReadMavenPom extends FunctionSupport {
     public static class Arguments {
         private File file;
         private String fileName;
+
+        public Arguments() {
+        }
+
+        public Arguments(String fileName) {
+            this.fileName = fileName;
+        }
 
         public File getFile() {
             return file;

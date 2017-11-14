@@ -94,7 +94,7 @@ public class Fabric8Commands extends FunctionSupport {
 
     public String getReleaseVersionFromMavenMetadata(String url) {
         try {
-            String result = sh("curl -L " + url + " | grep \'<latest\' | cut -f2 -d\'>\'|cut -f1 -d\'<\'");
+            String result = shOutput("curl -L " + url + " | grep \'<latest\' | cut -f2 -d\'>\'|cut -f1 -d\'<\'");
             return result.trim();
         } catch (Exception e) {
             error("Failed to find release version from maven central " + url + " due to: " + e);
@@ -104,7 +104,7 @@ public class Fabric8Commands extends FunctionSupport {
 
     public String updatePackageJSONVersion(final String f, final Object p, final Object v) {
         try {
-            return sh("sed -i -r \'s/\"" + p + "\": \"[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?(-development)?\"/\"" + p + "\": \"" + v + "\"/g\' " + f).trim();
+            return shOutput("sed -i -r \'s/\"" + p + "\": \"[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?(-development)?\"/\"" + p + "\": \"" + v + "\"/g\' " + f).trim();
         } catch (Exception e) {
             error("Failed to get package json version", e);
             return null;
@@ -113,7 +113,7 @@ public class Fabric8Commands extends FunctionSupport {
 
     public Object updateDockerfileEnvVar(final String f, final Object p, final Object v) {
         try {
-            return sh("sed -i -r \'s/ENV " + p + ".*/ENV " + p + " " + v + "/g\' " + f);
+            return shOutput("sed -i -r \'s/ENV " + p + ".*/ENV " + p + " " + v + "/g\' " + f);
         } catch (Exception e) {
             error("Failed to get dockerfile env var", e);
             return null;
@@ -223,7 +223,7 @@ public class Fabric8Commands extends FunctionSupport {
 
         List<String> answer = new ArrayList<>();
         try {
-            sh("find target/nexus-staging/staging/  -maxdepth 1 -name \"*.properties\" > target/nexus-staging/staging/repos.txt").trim();
+            shOutput("find target/nexus-staging/staging/  -maxdepth 1 -name \"*.properties\" > target/nexus-staging/staging/repos.txt").trim();
             String repos = readFile("target/nexus-staging/staging/repos.txt");
             String[] lines = repos.split("\n");
             for (String line : lines) {
@@ -250,19 +250,19 @@ public class Fabric8Commands extends FunctionSupport {
 
     public String searchAndReplaceMavenVersionPropertyNoCommit(final String property, final String newVersion) throws IOException {
         // example matches <fabric8.version>2.3</fabric8.version> <fabric8.version>2.3.12</fabric8.version> <fabric8.version>2.3.12.5</fabric8.version>
-        return sh("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
+        return shOutput("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
     }
 
     public String searchAndReplaceMavenVersionProperty(final String property, final String newVersion) throws IOException {
         // example matches <fabric8.version>2.3</fabric8.version> <fabric8.version>2.3.12</fabric8.version> <fabric8.version>2.3.12.5</fabric8.version>
         sh("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?</" + property + newVersion + "</g\'");
-        return sh("git commit -a -m \'Bump " + property + " version\'").trim();
+        return shOutput("git commit -a -m \'Bump " + property + " version\'").trim();
     }
 
     public String searchAndReplaceMavenSnapshotProfileVersionProperty(final String property, final String newVersion) throws IOException {
         // example matches <fabric8.version>2.3-SNAPSHOT</fabric8.version> <fabric8.version>2.3.12-SNAPSHOT</fabric8.version> <fabric8.version>2.3.12.5-SNAPSHOT</fabric8.version>
         sh("find -type f -name \'pom.xml\' | xargs sed -i -r \'s/" + property + "[0-9][0-9]{0,2}.[0-9][0-9]{0,2}(.[0-9][0-9]{0,2)?(.[0-9][0-9]{0,2)?-SNAPSHOT</" + property + newVersion + "-SNAPSHOT</g\'");
-        return sh("git commit -a -m \'Bump " + property + " development profile SNAPSHOT version\'");
+        return shOutput("git commit -a -m \'Bump " + property + " development profile SNAPSHOT version\'");
     }
 
     public String setupWorkspaceForRelease(String project, Boolean useGitTagForNextVersion, String mvnExtraArgs, String currentVersion) throws IOException {
@@ -294,10 +294,10 @@ public class Fabric8Commands extends FunctionSupport {
 
         // delete any previous branches of this release
         try {
-            return sh("git checkout -b release-v" + releaseVersion);
+            return shOutput("git checkout -b release-v" + releaseVersion);
         } catch (Exception err) {
             sh("git branch -D release-v" + releaseVersion);
-            return sh("git checkout -b release-v" + releaseVersion);
+            return shOutput("git checkout -b release-v" + releaseVersion);
         }
     }
 
@@ -310,8 +310,8 @@ public class Fabric8Commands extends FunctionSupport {
     }
 
     public String getNewVersionFromTag(String pomVersion) throws IOException {
-        //return sh("semver-release-version --folder " + getCurrentDir().getPath()).trim();
-        return sh("semver-release-number");
+        //return shOutput("semver-release-version --folder " + getCurrentDir().getPath()).trim();
+        return shOutput("semver-release-number");
 /*        final String version = "1.0.0";
 
         // Set known prerelease prefixes, needed for the proper sort order
@@ -419,7 +419,7 @@ public class Fabric8Commands extends FunctionSupport {
     public Object releaseSonartypeRepo(final String repoId) {
         try {
             // release the sonartype staging repo
-            return sh("mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-release -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Next release is ready\" -DstagingProgressTimeoutMinutes=60");
+            return shOutput("mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-release -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Next release is ready\" -DstagingProgressTimeoutMinutes=60");
 
         } catch (Exception err) {
             try {
@@ -434,7 +434,7 @@ public class Fabric8Commands extends FunctionSupport {
     public Object dropStagingRepo(final String repoId) {
         echo("Not a release so dropping staging repo " + repoId);
         try {
-            return sh("mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-drop -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Dry run\" -DstagingProgressTimeoutMinutes=60");
+            return shOutput("mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.5:rc-drop -DserverId=oss-sonatype-staging -DnexusUrl=https://oss.sonatype.org -DstagingRepositoryId=" + repoId + " -Ddescription=\"Dry run\" -DstagingProgressTimeoutMinutes=60");
         } catch (Exception e) {
             error("Failed to drop staging repository " + repoId + ". " + e, e);
         }
@@ -445,7 +445,8 @@ public class Fabric8Commands extends FunctionSupport {
         final Object pluginVersion = getReleaseVersion("io/fabric8/fabric8-maven-plugin");
         try {
             sh("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm");
-            return sh("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm-push");
+            sh("mvn -B io.fabric8:fabric8-maven-plugin:" + pluginVersion + ":helm-push");
+            return null;
         } catch (Exception err) {
             throw new FailedBuildException("ERROR with helm push " + err, err);
         }
@@ -453,12 +454,14 @@ public class Fabric8Commands extends FunctionSupport {
 
     public Object pushTag(final String releaseVersion) throws IOException {
         sh("git tag -fa v" + releaseVersion + " -m \'Release version " + releaseVersion + "\'");
-        return sh("git push origin v" + releaseVersion);
+        sh("git push origin v" + releaseVersion);
+        return null;
     }
 
     public String updateGithub() throws IOException {
         final String releaseVersion = getProjectVersion();
-        return sh("git push origin release-v" + releaseVersion);
+        sh("git push origin release-v" + releaseVersion);
+        return null;
     }
 
     public Object updateNextDevelopmentVersion(String releaseVersion, String mvnExtraArgs) throws IOException {
@@ -466,7 +469,8 @@ public class Fabric8Commands extends FunctionSupport {
         sh("mvn -B build-helper:parse-version versions:set -DnewVersion=${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT " + mvnExtraArgs);
         final Object snapshotVersion = getProjectVersion();
         sh("git commit -a -m \'[CD] prepare for next development iteration " + snapshotVersion + "\'");
-        return sh("git push origin release-v" + releaseVersion);
+        sh("git push origin release-v" + releaseVersion);
+        return null;
     }
 
     public Object updateNextDevelopmentVersion(String releaseVersion) throws IOException {
@@ -508,12 +512,14 @@ TODO
         sh("find . -name \'*.md\' ! -name Changes.md ! -path \'*/docs/jube/**.*\' | xargs perl -p -i -e \'s/\\Q" + oldVersion + "/" + newVersion + "/g\'");
         sh("find . -path \'*/website/src/**.*\' | xargs perl -p -i -e \'s/\\Q" + oldVersion + "/" + newVersion + "/g\'");
 
-        return sh("git commit -a -m \'[CD] Update docs following " + newVersion + " release\'");
+        sh("git commit -a -m \'[CD] Update docs following " + newVersion + " release\'");
+        return null;
 
     }
 
     public Object runSystemTests() throws IOException {
-        return sh("cd systests && mvn clean && mvn integration-test verify");
+        sh("cd systests && mvn clean && mvn integration-test verify");
+        return null;
     }
 
     @NonCPS

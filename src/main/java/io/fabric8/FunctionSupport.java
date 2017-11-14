@@ -15,6 +15,9 @@
  */
 package io.fabric8;
 
+import com.google.common.base.Strings;
+import io.fabric8.pipeline.steps.git.GitHelper;
+import io.fabric8.pipeline.steps.git.GitRepositoryInfo;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.pipeline.steps.helpers.Loggers;
 import io.fabric8.pipeline.steps.helpers.ProcessHelper;
@@ -25,6 +28,7 @@ import io.jenkins.functions.support.DefaultLogger;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -33,9 +37,10 @@ import java.util.concurrent.Callable;
 /**
  * A useful base class for implementing functions reusing common semantics from pipeline libraries
  */
-public abstract class FunctionSupport {
+public class FunctionSupport {
     private Logger logger = DefaultLogger.getInstance();
     private File currentDir = new File(".");
+    private Map<String,String> env = new HashMap<>();
 
     public FunctionSupport() {
     }
@@ -69,7 +74,21 @@ public abstract class FunctionSupport {
         return new File(currentDir, name);
     }
 
-    public String sh(String command) {
+    /**
+     * Invokes the given command
+     */
+    public void sh(String command) {
+        try {
+            exec("bash", "-c", command);
+        } catch (IOException e) {
+            throw new FailedBuildException("Failed to run command: " + command, e);
+        }
+    }
+
+    /**
+     * Returns the output of the given command
+     */
+    public String shOutput(String command) {
         try {
             return execAndGetOutput("bash", "-c", command);
         } catch (IOException e) {
@@ -77,8 +96,12 @@ public abstract class FunctionSupport {
         }
     }
 
+    public void exec(String... commands) throws IOException {
+        ProcessHelper.runCommand(currentDir, getLogger(), getEnv(), commands);
+    }
+
     public String execAndGetOutput(String... commands) throws IOException {
-        return ProcessHelper.runCommandCaptureOutput(currentDir, commands);
+        return ProcessHelper.runCommandCaptureOutput(currentDir, getLogger(), getEnv(), commands);
     }
 
     public String readFile(String fileName) throws IOException {
@@ -101,6 +124,14 @@ public abstract class FunctionSupport {
 
     public void setLogger(Logger logger) {
         this.logger = logger;
+    }
+
+    public Map<String, String> getEnv() {
+        return env;
+    }
+
+    public void setEnv(Map<String, String> env) {
+        this.env = env;
     }
 
     /**
@@ -158,4 +189,17 @@ public abstract class FunctionSupport {
         }
     }
 
+    /**
+     * Clones the git repository to a folder based on the repository name and evaluates the block
+     */
+    public <T> T git(String url, Callable<T> callable) throws Exception {
+        GitRepositoryInfo info = GitHelper.parseGitRepositoryInfo(url);
+        String dirName = info.getName();
+        if (Strings.isNullOrEmpty(dirName)) {
+            dirName = "gitCloneDir";
+        }
+        sh("git clone " + url + " " + dirName);
+        File projectDir = createFile(dirName);
+        return dir(projectDir, callable);
+    }
 }

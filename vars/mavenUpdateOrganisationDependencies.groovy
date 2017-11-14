@@ -5,6 +5,7 @@ import groovy.xml.DOMBuilder
 import groovy.xml.XmlUtil
 import groovy.xml.dom.DOMCategory
 import io.fabric8.Fabric8Commands
+import io.fabric8.pipeline.steps.WaitUntilPullRequestMerged
 import org.w3c.dom.Element
 
 def call(body) {
@@ -105,7 +106,7 @@ def call(body) {
                     println "received Pull Request Id: ${id}"
                     flow.addMergeCommentToPullRequest(id, project)
 
-                    waitUntilPullRequestMerged{
+                    WaitUntilPullRequestMerged{
                         name = project
                         prId = id
                     }

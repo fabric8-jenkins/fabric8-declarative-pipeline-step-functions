@@ -24,6 +24,8 @@ import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+import static io.fabric8.pipeline.steps.ServiceConstants.MAVEN_CENTRAL;
+
 public class SonarQubeScanner extends FunctionSupport implements Function<SonarQubeScanner.Arguments, String> {
 
     public SonarQubeScanner() {
@@ -52,7 +54,7 @@ public class SonarQubeScanner extends FunctionSupport implements Function<SonarQ
                         public String call() {
                             String localScanner = "scanner-cli.jar";
 
-                            String scannerURL = "http://central.maven.org/maven2/org/sonarsource/scanner/cli/sonar-scanner-cli/" + scannerVersion + "/sonar-scanner-cli-" + scannerVersion + ".jar";
+                            String scannerURL = MAVEN_CENTRAL + "org/sonarsource/scanner/cli/sonar-scanner-cli/" + scannerVersion + "/sonar-scanner-cli-" + scannerVersion + ".jar";
 
                             echo("downloading scanner-cli");
 

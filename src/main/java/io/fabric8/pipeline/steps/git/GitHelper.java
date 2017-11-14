@@ -106,4 +106,17 @@ public class GitHelper {
             return cloneUrl;
         }
     }
+
+    /**
+     * Returns the repository name for a github project name of the form <code>foo/bar</code>
+     */
+    public static String getRepoName(String project) {
+        if (Strings.notEmpty(project)) {
+            int idx = project.lastIndexOf('/');
+            if (idx >= 0) {
+                return project.substring(idx + 1);
+            }
+        }
+        return project;
+    }
 }

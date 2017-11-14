@@ -15,13 +15,13 @@
  */
 package io.fabric8;
 
-import com.google.common.base.Strings;
 import io.fabric8.pipeline.steps.git.GitHelper;
 import io.fabric8.pipeline.steps.git.GitRepositoryInfo;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.pipeline.steps.helpers.Loggers;
 import io.fabric8.pipeline.steps.helpers.ProcessHelper;
 import io.fabric8.utils.IOHelpers;
+import io.fabric8.utils.Strings;
 import io.jenkins.functions.Logger;
 import io.jenkins.functions.support.DefaultLogger;
 
@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -195,7 +196,7 @@ public class FunctionSupport {
     public <T> T git(String url, Callable<T> callable) throws Exception {
         GitRepositoryInfo info = GitHelper.parseGitRepositoryInfo(url);
         String dirName = info.getName();
-        if (Strings.isNullOrEmpty(dirName)) {
+        if (Strings.notEmpty(dirName)) {
             dirName = "gitCloneDir";
         }
         sh("git clone " + url + " " + dirName);
@@ -211,6 +212,63 @@ public class FunctionSupport {
             return callable.call();
         } catch (Exception e) {
             throw new FailedBuildException(e);
+        }
+    }
+
+    /**
+     * Sends a message to Hubot
+     */
+    public void hubotSend(String message) {
+        hubotSend(message, null, false);
+    }
+
+    /**
+     * Sends a message to Hubot
+     */
+    public void hubotSend(String message, String room, boolean failOnError) {
+        Map<String, Object> map = new LinkedHashMap<>(3);
+        if (Strings.notEmpty(room)) {
+            map.put("room", room);
+        }
+        map.put("message", message);
+        map.put("failOnError", failOnError);
+        callStep("hubotSend", map);
+    }
+
+    /**
+     * Waits until the given criteria is true ignoring any exceptions that occur each time
+     */
+    public boolean waitUntil(Callable<Boolean> callable) {
+        return waitUntil(250, -1, callable);
+    }
+
+    /**
+     * Waits until the given criteria is true ignoring any exceptions that occur each time
+     */
+    public boolean waitUntil(long retryTimeout, long maximumTimeout, Callable<Boolean> callable) {
+        long endTime = 0L;
+        if (maximumTimeout > 0) {
+            endTime = System.currentTimeMillis() + maximumTimeout;
+        }
+        while (true) {
+            Boolean value = null;
+            try {
+                value = callable.call();
+            } catch (Exception e) {
+                error("Failed waiting for condition", e);
+            }
+            if (value != null && value.booleanValue()) {
+                return true;
+            }
+            if (endTime > 0L && System.currentTimeMillis() > endTime) {
+                error("waitUntil timed out after " + maximumTimeout + " millis");
+                return false;
+            }
+            try {
+                Thread.sleep(retryTimeout);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

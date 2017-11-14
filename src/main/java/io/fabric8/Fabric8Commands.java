@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.pipeline.steps.ServiceConstants;
 import io.fabric8.pipeline.steps.helpers.DomUtils;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.utils.IOHelpers;
@@ -44,9 +45,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,6 +66,10 @@ public class Fabric8Commands extends FunctionSupport {
         String githubToken = System.getenv(EnvironmentVariableNames.GITHUB_TOKEN);
 
         return Strings.notEmpty(githubToken) || (Strings.notEmpty(user) && Strings.notEmpty(password));
+    }
+
+    public GitHub createGitHub() {
+        return createGitHub(null);
     }
 
     public GitHub createGitHub(String githubToken) {
@@ -174,7 +177,7 @@ public class Fabric8Commands extends FunctionSupport {
     }
 
     public String getMavenCentralVersion(final String artifact) {
-        return DomUtils.parseXmlForURLAndReturnFirstElementText(getLogger(), "http://central.maven.org/maven2/" + artifact + "/maven-metadata.xml", "latest");
+        return DomUtils.parseXmlForURLAndReturnFirstElementText(getLogger(), ServiceConstants.MAVEN_CENTRAL + artifact + "/maven-metadata.xml", "latest");
     }
 
     public String getVersion(String repo, String artifact) {
@@ -375,11 +378,10 @@ public class Fabric8Commands extends FunctionSupport {
             //step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 
         } catch (Exception err) {
-            Map<String, Object> map = new LinkedHashMap<>(3);
-            map.put("room", "release");
-            map.put("message", "Release failed when building and deploying to Nexus " + err);
-            map.put("failOnError", false);
-            callStep("hubotSend", map);
+            String message = "Release failed when building and deploying to Nexus " + err;
+            String room = "release";
+            boolean failOnError = false;
+            hubotSend(message, room, failOnError);
 
             throw new FailedBuildException("ERROR Release failed when building and deploying to Nexus " + err, err);
         }
@@ -592,7 +594,7 @@ TODO
 
 
     public GHPullRequest createPullRequest(final String message, final String project, final String branch) {
-        GitHub gitHub = createGitHub(null);
+        GitHub gitHub = createGitHub();
         GHRepository repository = null;
         try {
             repository = gitHub.getRepository(project);

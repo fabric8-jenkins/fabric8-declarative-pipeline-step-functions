@@ -1,5 +1,5 @@
 #!/usr/bin/groovy
-import com.cloudbees.groovy.cps.NonCPS
+import io.fabric8.pipeline.steps.WaitUntilPullRequestMerged
 
 def call(body) {
   // evaluate the body block, and collect configuration into the object
@@ -68,7 +68,7 @@ def call(body) {
           flow.mergePR(project, id)
         } else {
           flow.addMergeCommentToPullRequest(id, project)
-          waitUntilPullRequestMerged{
+          WaitUntilPullRequestMerged{
             name = project
             prId = id
           }

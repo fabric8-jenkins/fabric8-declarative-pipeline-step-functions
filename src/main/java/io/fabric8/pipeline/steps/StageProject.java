@@ -18,12 +18,14 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+@Step
 public class StageProject extends FunctionSupport implements Function<StageProject.Arguments, StagedProjectInfo> {
     public StageProject() {
     }
@@ -37,6 +39,7 @@ public class StageProject extends FunctionSupport implements Function<StageProje
     }
 
     @Override
+    @Step
     public StagedProjectInfo apply(Arguments config) {
         final Fabric8Commands flow = new Fabric8Commands(this);
 

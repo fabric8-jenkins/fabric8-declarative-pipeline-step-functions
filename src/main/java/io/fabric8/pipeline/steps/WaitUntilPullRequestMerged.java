@@ -21,6 +21,7 @@ import io.fabric8.FunctionSupport;
 import io.fabric8.pipeline.steps.git.GitHelper;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
@@ -32,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+@Step
 public class WaitUntilPullRequestMerged extends FunctionSupport implements Function<WaitUntilPullRequestMerged.Arguments, Boolean> {
     public WaitUntilPullRequestMerged() {
     }
@@ -41,6 +43,7 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
     }
 
     @Override
+    @Step
     public Boolean apply(Arguments config) {
         Fabric8Commands flow = new Fabric8Commands(this);
 

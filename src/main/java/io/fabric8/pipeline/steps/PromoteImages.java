@@ -19,6 +19,7 @@ import com.google.common.base.Strings;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 /**
  * Promote images
  */
+@Step
 public class PromoteImages extends FunctionSupport implements Function<PromoteImages.Arguments, String> {
     public PromoteImages() {
     }
@@ -39,6 +41,7 @@ public class PromoteImages extends FunctionSupport implements Function<PromoteIm
     }
 
     @Override
+    @Step
     public String apply(Arguments config) {
         final List<String> images = config.getImages();
         final String tag = config.getTag();

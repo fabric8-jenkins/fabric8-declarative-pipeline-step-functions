@@ -44,6 +44,7 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
         super(parentStep);
     }
 
+    @Step
     public String apply(Arguments args) {
         Fabric8Commands flow = new Fabric8Commands(this);
         Utils utils = new Utils(this);

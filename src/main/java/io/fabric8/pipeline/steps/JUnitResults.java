@@ -17,6 +17,7 @@ package io.fabric8.pipeline.steps;
 
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.io.File;
 import java.io.Serializable;
@@ -24,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
 
+@Step
 public class JUnitResults extends FunctionSupport implements Function<JUnitResults.Arguments, String> {
     public JUnitResults() {
     }
@@ -33,6 +35,7 @@ public class JUnitResults extends FunctionSupport implements Function<JUnitResul
     }
 
     @Override
+    @Step
     public String apply(Arguments config) {
         boolean archiveTestResults = config.isArchiveTestResults();
         if (archiveTestResults) {

@@ -24,7 +24,7 @@
     <version>9</version>
   </parent>
 
-  <groupId>io.fabric8.cd</groupId>
+  <groupId>io.fabric8.jenkins</groupId>
   <artifactId>fabric8-declarative-pipeline-step-functions</artifactId>
   <version>2.2-SNAPSHOT</version>
 
@@ -75,7 +75,8 @@
     <declarative-stepfunctions-api.version>1.0-SNAPSHOT</declarative-stepfunctions-api.version>
     <fabric8.version>3.0.8</fabric8.version>
     <fabric8.maven.plugin.version>3.5.33</fabric8.maven.plugin.version>
-    <workflow-job.verion>2.10</workflow-job.verion>
+    <jenkins.version>2.73.3</jenkins.version>
+    <workflow-job.verion>2.15</workflow-job.verion>
     <openshift-sync.version>0.1.12</openshift-sync.version>
     <gmavenVersion>1.4</gmavenVersion>
     <gmavenProviderSelection>2.0</gmavenProviderSelection>
@@ -226,11 +227,6 @@
         <artifactId>workflow-job</artifactId>
         <version>${workflow-job.verion}</version>
       </dependency>
-      <dependency>
-        <groupId>io.fabric8.jenkins.plugins</groupId>
-        <artifactId>openshift-sync</artifactId>
-        <version>${openshift-sync.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -238,6 +234,11 @@
     <dependency>
       <groupId>io.jenkins.functions</groupId>
       <artifactId>functions-api</artifactId>
+      <version>${declarative-stepfunctions-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.functions</groupId>
+      <artifactId>functions-loader</artifactId>
       <version>${declarative-stepfunctions-api.version}</version>
     </dependency>
     <dependency>
@@ -274,11 +275,10 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-job</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.fabric8.jenkins.plugins</groupId>
-      <artifactId>openshift-sync</artifactId>
-    </dependency>
+
+
     <!-- I think this is the version jenkins piplines uses? -->
+<!--
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
@@ -289,20 +289,21 @@
       <artifactId>groovy-json</artifactId>
       <version>2.4.3</version>
     </dependency>
+-->
+    <dependency>
+      <groupId>org.csanchez.jenkins.plugins</groupId>
+      <artifactId>kubernetes</artifactId>
+      <version>1.1</version>
+    </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>jenkins-core</artifactId>
-      <version>2.47</version>
+      <version>${jenkins.version}</version>
     </dependency>
     <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>groovy-cps</artifactId>
-      <version>1.11</version>
-    </dependency>
-    <dependency>
-      <groupId>org.csanchez.jenkins.plugins</groupId>
-      <artifactId>kubernetes</artifactId>
-      <version>0.12</version>
+      <version>1.20</version>
     </dependency>
 
 

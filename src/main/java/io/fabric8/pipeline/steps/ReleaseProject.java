@@ -19,12 +19,14 @@ import io.fabric8.FunctionSupport;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Logger;
+import io.jenkins.functions.Step;
 import org.kohsuke.github.GHPullRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+@Step
 public class ReleaseProject extends FunctionSupport implements Function<ReleaseProject.Arguments, Boolean> {
     public ReleaseProject() {
     }
@@ -34,6 +36,7 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
     }
 
     @Override
+    @Step
     public Boolean apply(Arguments config) {
         GHPullRequest pullRequest = new PromoteArtifacts(this).apply(config.createPromoteArtifactsArguments());
 

@@ -18,6 +18,7 @@ package io.fabric8.pipeline.steps;
 import com.google.common.base.Strings;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.function.Function;
 /**
  * Tags docker images
  */
+@Step
 public class TagImages extends FunctionSupport implements Function<TagImages.Arguments, String> {
 
     public TagImages() {
@@ -45,6 +47,7 @@ public class TagImages extends FunctionSupport implements Function<TagImages.Arg
     }
 
     @Override
+    @Step
     public String apply(final Arguments args) {
         final List<String> images = args.getImages();
         final String tag = args.getTag();

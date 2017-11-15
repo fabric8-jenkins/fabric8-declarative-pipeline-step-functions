@@ -20,12 +20,14 @@ import io.fabric8.FunctionSupport;
 import io.fabric8.Utils;
 import io.fabric8.pipeline.steps.helpers.BooleanHelpers;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+@Step
 public class BayesianScanner extends FunctionSupport implements Function<BayesianScanner.Arguments, String> {
 
     public BayesianScanner() {
@@ -36,6 +38,7 @@ public class BayesianScanner extends FunctionSupport implements Function<Bayesia
     }
 
     @Override
+    @Step
     public String apply(Arguments config) {
         final String serviceName = config.getServiceName();
         if (config.isRunBayesianScanner()) {

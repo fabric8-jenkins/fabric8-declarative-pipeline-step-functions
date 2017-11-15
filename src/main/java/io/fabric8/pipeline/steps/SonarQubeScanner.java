@@ -19,6 +19,7 @@ import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -26,6 +27,7 @@ import java.util.function.Function;
 
 import static io.fabric8.pipeline.steps.ServiceConstants.MAVEN_CENTRAL;
 
+@Step
 public class SonarQubeScanner extends FunctionSupport implements Function<SonarQubeScanner.Arguments, String> {
 
     public SonarQubeScanner() {
@@ -36,6 +38,7 @@ public class SonarQubeScanner extends FunctionSupport implements Function<SonarQ
     }
 
     @Override
+    @Step
     public String apply(Arguments config) {
         final String serviceName = config.getServiceName();
         final int port = config.getServicePort();

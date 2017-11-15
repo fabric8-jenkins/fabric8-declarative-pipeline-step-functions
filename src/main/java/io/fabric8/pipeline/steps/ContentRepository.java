@@ -18,9 +18,11 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.util.function.Function;
 
+@Step
 public class ContentRepository extends FunctionSupport implements Function<ContentRepository.Arguments, String> {
     public ContentRepository() {
     }
@@ -30,6 +32,7 @@ public class ContentRepository extends FunctionSupport implements Function<Conte
     }
 
     @Override
+    @Step
     public String apply(Arguments config) {
         final String serviceName = config.getServiceName();
         if (config.isUseContentRepository()) {

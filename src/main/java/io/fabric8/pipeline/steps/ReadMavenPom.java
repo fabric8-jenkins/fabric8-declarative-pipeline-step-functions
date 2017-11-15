@@ -18,6 +18,7 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.FunctionSupport;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -31,6 +32,7 @@ import java.io.InputStream;
 /**
  * Helper function for reading the maven <code>pom.xml</code> file
  */
+@Step
 public class ReadMavenPom extends FunctionSupport {
     public ReadMavenPom() {
     }
@@ -47,6 +49,7 @@ public class ReadMavenPom extends FunctionSupport {
         return apply(new Arguments(fileName));
     }
 
+    @Step
     public Model apply(Arguments arguments) throws IOException, XmlPullParserException {
         File file = arguments.getFile();
         if (file == null) {

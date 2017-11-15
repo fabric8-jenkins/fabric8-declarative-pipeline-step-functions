@@ -18,11 +18,13 @@ package io.fabric8.pipeline.steps;
 import com.google.common.base.Strings;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+@Step
 public class StageExtraImages extends FunctionSupport implements Function<StageExtraImages.Arguments, String> {
     public StageExtraImages() {
     }
@@ -32,6 +34,7 @@ public class StageExtraImages extends FunctionSupport implements Function<StageE
     }
 
     @Override
+    @Step
     public String apply(final Arguments config) {
         final List<String> images = config.getImages();
         final String tag = config.getTag();

@@ -18,6 +18,7 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 import org.kohsuke.github.GHPullRequest;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+@Step
 public class PromoteArtifacts extends FunctionSupport implements Function<PromoteArtifacts.Arguments, GHPullRequest> {
 
     public PromoteArtifacts() {
@@ -35,6 +37,7 @@ public class PromoteArtifacts extends FunctionSupport implements Function<Promot
     }
 
     @Override
+    @Step
     public GHPullRequest apply(Arguments config) {
         final String project = config.getProject();
         final String version = config.getVersion();

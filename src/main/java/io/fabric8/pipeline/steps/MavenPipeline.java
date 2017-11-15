@@ -23,6 +23,7 @@ import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Logger;
+import io.jenkins.functions.Step;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,17 @@ import java.util.function.Function;
 /**
  * Performs a full CI / CD pipeline for maven projects
  */
+@Step
 public class MavenPipeline  extends FunctionSupport implements Function<MavenPipeline.Arguments, Boolean> {
+    public MavenPipeline() {
+    }
+
+    public MavenPipeline(FunctionSupport parentStep) {
+        super(parentStep);
+    }
+
     @Override
+    @Step
     public Boolean apply(Arguments arguments) {
         checkoutScm();
         Utils utils = new Utils(this);

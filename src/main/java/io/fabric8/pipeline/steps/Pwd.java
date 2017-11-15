@@ -18,6 +18,7 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.FunctionSupport;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.jenkins.functions.Argument;
+import io.jenkins.functions.Step;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.function.Function;
 /**
  * Helper function to return the current working directory or create a temporary new dir
  */
+@Step
 public class Pwd extends FunctionSupport implements Function<Pwd.Arguments, File> {
     public Pwd() {
     }
@@ -43,6 +45,7 @@ public class Pwd extends FunctionSupport implements Function<Pwd.Arguments, File
     }
 
     @Override
+    @Step
     public File apply(Arguments arguments) {
         if (arguments.isTmp()) {
             try {

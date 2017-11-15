@@ -31,6 +31,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * Promote images
  */
 public class PromoteImages extends FunctionSupport implements Function<PromoteImages.Arguments, String> {
+    public PromoteImages() {
+    }
+
+    public PromoteImages(FunctionSupport parentStep) {
+        super(parentStep);
+    }
 
     @Override
     public String apply(Arguments config) {
@@ -83,6 +89,17 @@ public class PromoteImages extends FunctionSupport implements Function<PromoteIm
         private String toRegistry;
         @Argument
         private List<String> images = new ArrayList<>();
+
+        public Arguments() {
+        }
+
+        public Arguments(String tag, String org, String toRegistry, List<String> images) {
+            this.tag = tag;
+            this.org = org;
+            this.toRegistry = toRegistry;
+            this.images = images;
+        }
+
 
         public List<String> getImages() {
             return images;

@@ -16,11 +16,11 @@
 package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
-import groovy.lang.Reference;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.fabric8.pipeline.steps.git.GitHelper;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.jenkins.functions.Argument;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
@@ -46,7 +46,7 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
 
         final GitHub gitHub = flow.createGitHub();
 
-        final String project = config.getName();
+        final String project = config.getProject();
         final int prId = config.getId();
 
         if (prId <= 0 || Strings.isNullOrEmpty(project)) {
@@ -59,10 +59,7 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
 
         echo("Waiting for Pull Request " + prId + " on project " + project);
 
-
-        final Reference<Object> branchName;
         final AtomicBoolean notified = new AtomicBoolean(false);
-
 
         // wait until the PR is merged, if there's a merge conflict the notify and wait until PR is finally merged
         return waitUntil(() -> {
@@ -135,22 +132,24 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
     }
 
     public static class Arguments {
+        @Argument
         private int id;
-        private String name;
+        @Argument
+        private String project;
 
         public Arguments() {
         }
 
-        public Arguments(int id, String name) {
+        public Arguments(int id, String project) {
             this.id = id;
-            this.name = name;
+            this.project = project;
         }
 
         @Override
         public String toString() {
             return "Arguments{" +
                     "id=" + id +
-                    ", name='" + name + '\'' +
+                    ", project='" + project + '\'' +
                     '}';
         }
 
@@ -162,12 +161,12 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
             this.id = id;
         }
 
-        public String getName() {
-            return name;
+        public String getProject() {
+            return project;
         }
 
-        public void setName(String name) {
-            this.name = name;
+        public void setProject(String project) {
+            this.project = project;
         }
     }
 

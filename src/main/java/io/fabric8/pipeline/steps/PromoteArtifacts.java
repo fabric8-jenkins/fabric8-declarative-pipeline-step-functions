@@ -18,13 +18,14 @@ package io.fabric8.pipeline.steps;
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
+import org.kohsuke.github.GHPullRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-public class PromoteArtifacts extends FunctionSupport implements Function<PromoteArtifacts.Arguments, String> {
+public class PromoteArtifacts extends FunctionSupport implements Function<PromoteArtifacts.Arguments, GHPullRequest> {
 
     public PromoteArtifacts() {
     }
@@ -34,47 +35,42 @@ public class PromoteArtifacts extends FunctionSupport implements Function<Promot
     }
 
     @Override
-    public String apply(Arguments config) {
-        final String name = config.getName();
+    public GHPullRequest apply(Arguments config) {
+        final String project = config.getProject();
         final String version = config.getVersion();
         final List<String> repoIds = config.getRepoIds();
         final String containerName = config.containerName;
 
-        container(containerName, new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                sh("chmod 600 /root/.ssh-git/ssh-key");
-                sh("chmod 600 /root/.ssh-git/ssh-key.pub");
-                sh("chmod 700 /root/.ssh-git");
+        container(containerName, (Callable<GHPullRequest>) () -> {
+            sh("chmod 600 /root/.ssh-git/ssh-key");
+            sh("chmod 600 /root/.ssh-git/ssh-key.pub");
+            sh("chmod 700 /root/.ssh-git");
 
-                Fabric8Commands flow = new Fabric8Commands(PromoteArtifacts.this);
+            Fabric8Commands flow = new Fabric8Commands(PromoteArtifacts.this);
 
-                echo("About to release " + name + " repo ids " + repoIds);
-                for (String repoId : repoIds) {
-                    flow.releaseSonartypeRepo(repoId);
-                }
-
-                if (config.isHelmPush()) {
-                    flow.helm();
-                }
-
-                if (config.isUpdateNextDevelopmentVersion()) {
-                    String args = config.getUpdateNextDevelopmentVersionArguments();
-                    if (args == null) {
-                        args = "";
-                    }
-                    flow.updateNextDevelopmentVersion(version, args);
-                    flow.createPullRequest("[CD] Release " + version, config.getProject(), "release-v" + version);
-                }
-                return null;
+            echo("About to release " + project + " repo ids " + repoIds);
+            for (String repoId : repoIds) {
+                flow.releaseSonartypeRepo(repoId);
             }
+
+            if (config.isHelmPush()) {
+                flow.helm();
+            }
+
+            if (config.isUpdateNextDevelopmentVersion()) {
+                String args = config.getUpdateNextDevelopmentVersionArguments();
+                if (args == null) {
+                    args = "";
+                }
+                flow.updateNextDevelopmentVersion(version, args);
+                return flow.createPullRequest("[CD] Release " + version, project, "release-v" + version);
+            }
+            return null;
         });
         return null;
     }
 
     public static class Arguments {
-        @Argument
-        private String name;
         @Argument
         private String project;
         @Argument
@@ -90,12 +86,18 @@ public class PromoteArtifacts extends FunctionSupport implements Function<Promot
         @Argument
         private String updateNextDevelopmentVersionArguments;
 
-        public String getName() {
-            return name;
+        public Arguments() {
         }
 
-        public void setName(String name) {
-            this.name = name;
+        public Arguments(String project, String version) {
+            this.project = project;
+            this.version = version;
+        }
+
+        public Arguments(String project, String version, List<String> repoIds) {
+            this.project = project;
+            this.version = version;
+            this.repoIds = repoIds;
         }
 
         public String getProject() {

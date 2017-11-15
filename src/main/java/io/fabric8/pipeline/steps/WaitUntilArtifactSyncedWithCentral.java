@@ -67,6 +67,15 @@ public class WaitUntilArtifactSyncedWithCentral extends FunctionSupport implemen
         @Argument
         private String ext = "jar";
 
+        public Arguments() {
+        }
+
+        public Arguments(String groupId, String artifactId, String version) {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+            this.version = version;
+        }
+
         @Override
         public String toString() {
             return "Arguments{" +

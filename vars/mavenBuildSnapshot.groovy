@@ -1,6 +1,7 @@
 #!/usr/bin/groovy
 import com.cloudbees.groovy.cps.NonCPS
 import io.fabric8.Fabric8Commands
+import io.fabric8.pipeline.steps.StageExtraImages
 
 def call(body) {
     // evaluate the body block, and collect configuration into the object
@@ -24,7 +25,7 @@ def call(body) {
 
     container(name: 'docker'){
         if (config.extraImagesToStage != null){
-            stageExtraImages {
+            StageExtraImages {
                 images = config.extraImagesToStage
                 tag = version
             }

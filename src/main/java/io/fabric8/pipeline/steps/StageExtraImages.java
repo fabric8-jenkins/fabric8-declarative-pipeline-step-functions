@@ -20,53 +20,45 @@ import io.fabric8.FunctionSupport;
 import io.jenkins.functions.Argument;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Tags docker images
- */
-public class TagImages extends FunctionSupport implements Function<TagImages.Arguments, String> {
-
-    public TagImages() {
+public class StageExtraImages extends FunctionSupport implements Function<StageExtraImages.Arguments, String> {
+    public StageExtraImages() {
     }
 
-    public TagImages(FunctionSupport parentStep) {
+    public StageExtraImages(FunctionSupport parentStep) {
         super(parentStep);
     }
 
-    public String apply(String tag, String... images) {
-        return apply(tag, Arrays.asList(images));
-    }
-
-    public String apply(String tag, List<String> images) {
-        return apply(new Arguments(tag, images));
-    }
-
     @Override
-    public String apply(final Arguments args) {
-        final List<String> images = args.getImages();
-        final String tag = args.getTag();
-        if (Strings.isNullOrEmpty(tag)) {
-            error("No tag specified for tagImages step for images " + images);
+    public String apply(final Arguments config) {
+        final List<String> images = config.getImages();
+        final String tag = config.getTag();
+
+        final String registryHost = ServiceConstants.getDockerRegistryHost();
+        final String registryPort = ServiceConstants.getDockerRegistryPort();
+
+        if (Strings.isNullOrEmpty(tag) || images == null) {
+            error("Missing arguments - was given: " + config);
             return null;
         }
-
         return container("docker", () -> {
             for (String image : images) {
                 retry(3, () -> {
-                    String registryHost = ServiceConstants.getDockerRegistryHost();
-                    String registryPort = ServiceConstants.getDockerRegistryPort();
-
-                    sh("docker pull " + registryHost + ":" + registryPort + "/fabric8/" + image + ":" + tag);
-                    sh("docker tag  " + registryHost + ":" + registryPort + "/fabric8/" + image + ":" + tag + " docker.io/fabric8/" + image + ":" + tag);
-                    sh("docker push docker.io/fabric8/" + image + ":" + tag);
+                    sh("docker pull docker.io/fabric8/" + image + ":latest");
+                    sh("docker tag docker.io/fabric8/" + image + ":latest " + registryHost + ":" + registryPort + "/fabric8/" + image + ":" + tag);
+                    sh("docker tag docker.io/fabric8/" + image + ":latest docker.io/fabric8/" + image + ":" + tag);
+                    sh("docker push " + registryHost + ":" + registryPort + "/fabric8/" + image + ":" + tag);
                     return null;
                 });
             }
             return null;
         });
+    }
+
+    public String apply(String tag, List<String> extraStageImages) {
+        return apply(new Arguments(tag, extraStageImages));
     }
 
     public static class Arguments {
@@ -83,12 +75,12 @@ public class TagImages extends FunctionSupport implements Function<TagImages.Arg
             this.images = images;
         }
 
-        public List<String> getImages() {
-            return images;
-        }
-
-        public void setImages(List<String> images) {
-            this.images = images;
+        @Override
+        public String toString() {
+            return "Arguments{" +
+                    "tag='" + tag + '\'' +
+                    ", images=" + images +
+                    '}';
         }
 
         public String getTag() {
@@ -97,6 +89,14 @@ public class TagImages extends FunctionSupport implements Function<TagImages.Arg
 
         public void setTag(String tag) {
             this.tag = tag;
+        }
+
+        public List<String> getImages() {
+            return images;
+        }
+
+        public void setImages(List<String> images) {
+            this.images = images;
         }
     }
 }

@@ -271,4 +271,8 @@ public class FunctionSupport {
             }
         }
     }
+
+    protected void checkoutScm() {
+        // TODO
+    }
 }

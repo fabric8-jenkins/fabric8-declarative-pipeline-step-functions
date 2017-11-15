@@ -15,6 +15,8 @@
  */
 package io.fabric8.pipeline.steps.git;
 
+import io.fabric8.utils.Strings;
+
 /**
  */
 public class GitRepositoryInfo {
@@ -46,6 +48,20 @@ public class GitRepositoryInfo {
     }
 
     public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the organisation and repository name separated by / in the form <code>organisation/name</code>
+     */
+    public String getProject() {
+        if (Strings.notEmpty(organisation)) {
+            if (Strings.notEmpty(name)) {
+                return organisation + "/" + name;
+            } else {
+                return organisation;
+            }
+        }
         return name;
     }
 }

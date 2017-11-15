@@ -26,10 +26,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class GitCloneUrlParseTest {
     @Test
     public void testParseGitHostOrganisation() throws Exception {
+        GitRepositoryInfo info = assertParseGitRepositoryInfo("git://github.com/jstrachan/npm-pipeline-test-project.git", "github.com", "jstrachan", "npm-pipeline-test-project");
+        assertThat(info.getProject()).describedAs("Project name for " + info).isEqualTo("jstrachan/npm-pipeline-test-project");
+
         assertParseGitRepositoryInfo("git://host.xz/org/repo", "host.xz", "org", "repo");
         assertParseGitRepositoryInfo("git://host.xz/org/repo.git", "host.xz", "org", "repo");
         assertParseGitRepositoryInfo("git://host.xz/org/repo.git/", "host.xz", "org", "repo");
-        assertParseGitRepositoryInfo("git://github.com/jstrachan/npm-pipeline-test-project.git", "github.com", "jstrachan", "npm-pipeline-test-project");
         assertParseGitRepositoryInfo("https://github.com/fabric8io/foo.git", "github.com", "fabric8io", "foo");
         assertParseGitRepositoryInfo("https://github.com/fabric8io/foo", "github.com", "fabric8io", "foo");
         assertParseGitRepositoryInfo("git@github.com:jstrachan/npm-pipeline-test-project.git", "github.com", "jstrachan", "npm-pipeline-test-project");
@@ -37,12 +39,13 @@ public class GitCloneUrlParseTest {
         assertParseGitRepositoryInfo("git@github.com:bar/foo", "github.com", "bar", "foo");
     }
 
-    private void assertParseGitRepositoryInfo(String uri, String host, String organsation, String name) {
+    private GitRepositoryInfo assertParseGitRepositoryInfo(String uri, String host, String organsation, String name) {
         GitRepositoryInfo actual = GitHelper.parseGitRepositoryInfo(uri);
         assertThat(actual).describedAs("Should have found GitRepositoryInfo").isNotNull();
         assertThat(actual.getHost()).describedAs("host").isEqualTo(host);
         assertThat(actual.getOrganisation()).describedAs("organsation").isEqualTo(organsation);
         assertThat(actual.getName()).describedAs("name").isEqualTo(name);
+        return actual;
     }
 
 }

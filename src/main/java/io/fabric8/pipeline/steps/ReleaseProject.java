@@ -26,6 +26,13 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ReleaseProject extends FunctionSupport implements Function<ReleaseProject.Arguments, Boolean> {
+    public ReleaseProject() {
+    }
+
+    public ReleaseProject(FunctionSupport parentStep) {
+        super(parentStep);
+    }
+
     @Override
     public Boolean apply(Arguments config) {
         GHPullRequest pullRequest = new PromoteArtifacts(this).apply(config.createPromoteArtifactsArguments());
@@ -49,7 +56,7 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
         if (waitUntilArtifactSyncedWithCentralArguments != null) {
             new WaitUntilArtifactSyncedWithCentral(this).apply(waitUntilArtifactSyncedWithCentralArguments);
         }
-        return null;
+        return true;
     }
 
     public static class Arguments {
@@ -73,6 +80,13 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
         private String artifactExtensionToWaitFor;
         @Argument
         private String artifactIdToWaitFor;
+
+        public Arguments() {
+        }
+
+        public Arguments(StagedProjectInfo stagedProject) {
+            this.stagedProject = stagedProject;
+        }
 
         @Override
         public String toString() {

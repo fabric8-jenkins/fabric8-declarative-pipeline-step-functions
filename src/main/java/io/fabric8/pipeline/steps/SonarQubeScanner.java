@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 import static io.fabric8.pipeline.steps.ServiceConstants.MAVEN_CENTRAL;
 
-@Step
+@Step(displayName = "Performs a SonarQube scan")
 public class SonarQubeScanner extends FunctionSupport implements Function<SonarQubeScanner.Arguments, String> {
 
     public SonarQubeScanner() {

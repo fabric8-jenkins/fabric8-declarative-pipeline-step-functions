@@ -34,7 +34,7 @@ import static io.fabric8.utils.Strings.notEmpty;
 /**
  * Declarative step function to perform a maven release
  */
-@Step
+@Step(displayName = "Performs a maven release without using a staging repository")
 public class MavenRelease extends FunctionSupport implements Function<MavenRelease.Arguments, String> {
 
     public MavenRelease() {

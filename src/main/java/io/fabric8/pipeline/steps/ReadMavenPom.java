@@ -32,7 +32,7 @@ import java.io.InputStream;
 /**
  * Helper function for reading the maven <code>pom.xml</code> file
  */
-@Step
+@Step(displayName = "Reads a maven pom.xml file and returns the parsed model")
 public class ReadMavenPom extends FunctionSupport {
     public ReadMavenPom() {
     }

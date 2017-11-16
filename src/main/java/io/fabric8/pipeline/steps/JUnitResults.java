@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Archives the JUnit test results")
 public class JUnitResults extends FunctionSupport implements Function<JUnitResults.Arguments, String> {
     public JUnitResults() {
     }

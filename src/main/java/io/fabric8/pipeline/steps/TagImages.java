@@ -28,7 +28,7 @@ import java.util.function.Function;
 /**
  * Tags docker images
  */
-@Step
+@Step(displayName = "Tags docker images")
 public class TagImages extends FunctionSupport implements Function<TagImages.Arguments, String> {
 
     public TagImages() {

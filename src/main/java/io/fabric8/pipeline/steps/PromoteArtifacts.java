@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Promotes maven archetypes to a nexus repository")
 public class PromoteArtifacts extends FunctionSupport implements Function<PromoteArtifacts.Arguments, GHPullRequest> {
 
     public PromoteArtifacts() {

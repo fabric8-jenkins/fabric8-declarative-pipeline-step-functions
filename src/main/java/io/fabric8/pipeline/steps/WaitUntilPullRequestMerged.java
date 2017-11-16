@@ -33,7 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Waits for a Pull Request to be merged")
 public class WaitUntilPullRequestMerged extends FunctionSupport implements Function<WaitUntilPullRequestMerged.Arguments, Boolean> {
     public WaitUntilPullRequestMerged() {
     }

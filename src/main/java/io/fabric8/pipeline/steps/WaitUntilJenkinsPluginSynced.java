@@ -26,7 +26,7 @@ import java.util.function.Function;
 /**
  * Waits for a jenkins plugin to be available in the Jenkins archive
  */
-@Step
+@Step(displayName = "Waits for a jenkins plugin to be synchronized with the jenkins plugin archive")
 public class WaitUntilJenkinsPluginSynced extends FunctionSupport implements Function<WaitUntilJenkinsPluginSynced.Arguments, Boolean> {
     public WaitUntilJenkinsPluginSynced() {
     }

@@ -31,7 +31,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 /**
  * Promote images
  */
-@Step
+@Step(displayName = "Promotes docker images to a docker registry like hub.docker.com")
 public class PromoteImages extends FunctionSupport implements Function<PromoteImages.Arguments, String> {
     public PromoteImages() {
     }

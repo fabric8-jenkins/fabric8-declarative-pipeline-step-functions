@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Releases a staged release promoting artifacts and docker images and waiting until artifacts are synced to the central repository")
 public class ReleaseProject extends FunctionSupport implements Function<ReleaseProject.Arguments, Boolean> {
     public ReleaseProject() {
     }

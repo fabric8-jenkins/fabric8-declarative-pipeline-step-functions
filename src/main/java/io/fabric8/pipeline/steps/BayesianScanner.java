@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Performs a Fabric8 Analytics scan")
 public class BayesianScanner extends FunctionSupport implements Function<BayesianScanner.Arguments, String> {
 
     public BayesianScanner() {

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Stages a release of the maven project into a staging repository")
 public class StageProject extends FunctionSupport implements Function<StageProject.Arguments, StagedProjectInfo> {
     public StageProject() {
     }

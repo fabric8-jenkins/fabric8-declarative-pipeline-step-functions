@@ -32,7 +32,7 @@ import java.util.function.Function;
 /**
  * Performs a full CI / CD pipeline for maven projects
  */
-@Step
+@Step(displayName = "Full CI / CD pipeline for maven projects")
 public class MavenPipeline  extends FunctionSupport implements Function<MavenPipeline.Arguments, Boolean> {
     public MavenPipeline() {
     }

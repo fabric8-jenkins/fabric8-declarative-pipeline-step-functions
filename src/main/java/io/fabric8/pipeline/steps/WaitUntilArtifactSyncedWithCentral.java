@@ -26,7 +26,7 @@ import java.util.function.Function;
 /**
  * Waits for a maven artifact to be in the maven central repository
  */
-@Step
+@Step(displayName = "Waits for an artifact to be synchronized to a central registry")
 public class WaitUntilArtifactSyncedWithCentral extends FunctionSupport implements Function<WaitUntilArtifactSyncedWithCentral.Arguments, String> {
     public WaitUntilArtifactSyncedWithCentral() {
     }

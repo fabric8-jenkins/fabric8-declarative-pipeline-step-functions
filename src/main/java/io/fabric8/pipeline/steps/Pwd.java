@@ -27,7 +27,7 @@ import java.util.function.Function;
 /**
  * Helper function to return the current working directory or create a temporary new dir
  */
-@Step
+@Step(displayName = "Evaluates the current working directory")
 public class Pwd extends FunctionSupport implements Function<Pwd.Arguments, File> {
     public Pwd() {
     }

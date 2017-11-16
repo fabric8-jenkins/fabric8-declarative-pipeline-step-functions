@@ -22,7 +22,7 @@ import io.jenkins.functions.Step;
 
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Optionally deploys the maven site to the content repository")
 public class ContentRepository extends FunctionSupport implements Function<ContentRepository.Arguments, String> {
     public ContentRepository() {
     }

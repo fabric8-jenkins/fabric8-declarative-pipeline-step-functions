@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@Step
+@Step(displayName = "Stages additional docker images")
 public class StageExtraImages extends FunctionSupport implements Function<StageExtraImages.Arguments, String> {
     public StageExtraImages() {
     }

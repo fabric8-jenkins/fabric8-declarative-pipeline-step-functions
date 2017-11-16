@@ -238,7 +238,7 @@
     </dependency>
     <dependency>
       <groupId>io.jenkins.functions</groupId>
-      <artifactId>functions-loader</artifactId>
+      <artifactId>functions-runtime</artifactId>
       <version>${declarative-stepfunctions-api.version}</version>
     </dependency>
     <dependency>

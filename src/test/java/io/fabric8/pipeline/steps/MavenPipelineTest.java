@@ -16,8 +16,8 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.support.Tests;
-import io.jenkins.functions.loader.FunctionContext;
-import io.jenkins.functions.loader.StepFunctions;
+import io.jenkins.functions.runtime.FunctionContext;
+import io.jenkins.functions.runtime.StepFunctions;
 import org.junit.Before;
 import org.junit.Test;
 

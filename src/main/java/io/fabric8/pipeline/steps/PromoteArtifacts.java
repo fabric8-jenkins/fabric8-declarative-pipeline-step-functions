@@ -75,9 +75,9 @@ public class PromoteArtifacts extends FunctionSupport implements Function<Promot
 
     public static class Arguments {
         @Argument
-        private String project;
+        private String project = "";
         @Argument
-        private String version;
+        private String version = "";
         @Argument
         private List<String> repoIds = new ArrayList<>();
         @Argument
@@ -87,7 +87,7 @@ public class PromoteArtifacts extends FunctionSupport implements Function<Promot
         @Argument
         private boolean updateNextDevelopmentVersion;
         @Argument
-        private String updateNextDevelopmentVersionArguments;
+        private String updateNextDevelopmentVersionArguments = "";
 
         public Arguments() {
         }

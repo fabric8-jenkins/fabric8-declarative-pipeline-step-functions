@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.fabric8.pipeline.steps.model;
+package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
-import io.fabric8.pipeline.steps.StageExtraImages;
+import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
@@ -64,7 +64,7 @@ public class StageProject extends FunctionSupport implements Function<StageProje
 
             String currentVersion = flow.getProjectVersion();
 
-            Boolean useGitTagForNextVersion = config.getUseGitTagForNextVersion();
+            boolean useGitTagForNextVersion = config.isUseGitTagForNextVersion();
             flow.setupWorkspaceForRelease(project, useGitTagForNextVersion, config.getExtraSetVersionArgs(), currentVersion);
 
             repoIdsRef.set(flow.stageSonartypeRepo());
@@ -73,7 +73,7 @@ public class StageProject extends FunctionSupport implements Function<StageProje
             // lets avoide the stash / unstash for now as we're not using helm ATM
             //stash excludes: '*/src/', includes: '**', name: "staged-${config.project}-${releaseVersion}".hashCode().toString()
 
-            if (useGitTagForNextVersion == null || !useGitTagForNextVersion.booleanValue()) {
+            if (!useGitTagForNextVersion) {
                 return flow.updateGithub();
             }
             return null;
@@ -88,11 +88,11 @@ public class StageProject extends FunctionSupport implements Function<StageProje
 
     public static class Arguments {
         @Argument
-        private String project;
+        private String project = "";
         @Argument
-        private Boolean useGitTagForNextVersion;
+        private boolean useGitTagForNextVersion;
         @Argument
-        private String extraSetVersionArgs;
+        private String extraSetVersionArgs = "";
         @Argument
         private List<String> extraImagesToStage = new ArrayList<>();
         @Argument
@@ -105,11 +105,11 @@ public class StageProject extends FunctionSupport implements Function<StageProje
             this.project = project;
         }
 
-        public Boolean getUseGitTagForNextVersion() {
+        public boolean isUseGitTagForNextVersion() {
             return useGitTagForNextVersion;
         }
 
-        public void setUseGitTagForNextVersion(Boolean useGitTagForNextVersion) {
+        public void setUseGitTagForNextVersion(boolean useGitTagForNextVersion) {
             this.useGitTagForNextVersion = useGitTagForNextVersion;
         }
 

@@ -75,7 +75,7 @@ public class ReadMavenPom extends FunctionSupport {
     public static class Arguments {
         private File file;
         @Argument
-        private String fileName;
+        private String fileName = "";
 
         public Arguments() {
         }

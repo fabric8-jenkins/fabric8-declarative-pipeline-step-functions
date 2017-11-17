@@ -75,7 +75,7 @@ public class TagImages extends FunctionSupport implements Function<TagImages.Arg
 
     public static class Arguments {
         @Argument
-        private String tag;
+        private String tag = "";
         @Argument
         private List<String> images = new ArrayList<>();
 

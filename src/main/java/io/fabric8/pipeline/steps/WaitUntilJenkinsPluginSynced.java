@@ -70,9 +70,9 @@ public class WaitUntilJenkinsPluginSynced extends FunctionSupport implements Fun
         @Argument
         private String repo = ServiceConstants.JENKINS_ARCHIVE_REPO;
         @Argument
-        private String name;
+        private String name = "";
         @Argument
-        private String version;
+        private String version = "";
 
         @Override
         public String toString() {

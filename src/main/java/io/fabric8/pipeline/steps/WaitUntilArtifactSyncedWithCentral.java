@@ -63,11 +63,11 @@ public class WaitUntilArtifactSyncedWithCentral extends FunctionSupport implemen
         @Argument
         private String repo = ServiceConstants.MAVEN_CENTRAL;
         @Argument
-        private String groupId;
+        private String groupId = "";
         @Argument
-        private String artifactId;
+        private String artifactId = "";
         @Argument
-        private String version;
+        private String version = "";
         @Argument
         private String ext = "jar";
 

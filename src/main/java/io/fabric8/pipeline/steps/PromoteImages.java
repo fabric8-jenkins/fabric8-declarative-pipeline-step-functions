@@ -86,11 +86,11 @@ public class PromoteImages extends FunctionSupport implements Function<PromoteIm
 
     public static class Arguments {
         @Argument
-        private String tag;
+        private String tag = "";
         @Argument
-        private String org;
+        private String org = "";
         @Argument
-        private String toRegistry;
+        private String toRegistry = "";
         @Argument
         private List<String> images = new ArrayList<>();
 

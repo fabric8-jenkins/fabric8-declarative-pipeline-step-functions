@@ -66,17 +66,17 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
 
     public static class Arguments {
         @Argument
-        private String project;
+        private String project = "";
         @Argument
-        private String releaseVersion;
+        private String releaseVersion = "";
         @Argument
-        private List<String> repoIds;
+        private List<String> repoIds = new ArrayList<>();
         @Argument
         private String containerName = "maven";
         @Argument
-        private String dockerOrganisation;
+        private String dockerOrganisation = "";
         @Argument
-        private String promoteToDockerRegistry;
+        private String promoteToDockerRegistry = "";
         @Argument
         private List<String> promoteDockerImages = new ArrayList<>();
         @Argument
@@ -84,11 +84,11 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
         @Argument
         private String repositoryToWaitFor = ServiceConstants.MAVEN_CENTRAL;
         @Argument
-        private String groupId;
+        private String groupId = "";
         @Argument
-        private String artifactExtensionToWaitFor;
+        private String artifactExtensionToWaitFor = "";
         @Argument
-        private String artifactIdToWaitFor;
+        private String artifactIdToWaitFor = "";
 
         public Arguments() {
         }

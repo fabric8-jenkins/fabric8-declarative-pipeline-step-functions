@@ -137,7 +137,7 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
         @Argument
         private boolean skipTests;
         @Argument
-        private String version;
+        private String version = "";
         @Argument
         private boolean enableArchiveTestResults = true;
 
@@ -161,7 +161,7 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
         private boolean enableContentRepositorySiteReport = true;
 
         @Argument
-        private String pomFileName;
+        private String pomFileName = "";
 
         // Adapters
         //-------------------------------------------------------------------------

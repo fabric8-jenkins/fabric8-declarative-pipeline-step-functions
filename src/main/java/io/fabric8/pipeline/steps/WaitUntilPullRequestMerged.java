@@ -136,9 +136,9 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
 
     public static class Arguments {
         @Argument
-        private int id;
+        private int id = 0;
         @Argument
-        private String project;
+        private String project = "";
 
         public Arguments() {
         }

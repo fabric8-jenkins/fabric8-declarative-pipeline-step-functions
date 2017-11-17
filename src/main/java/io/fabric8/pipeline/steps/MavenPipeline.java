@@ -21,7 +21,6 @@ import io.fabric8.pipeline.steps.git.GitHelper;
 import io.fabric8.pipeline.steps.git.GitRepositoryInfo;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
-import io.fabric8.pipeline.steps.model.StageProject;
 import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
@@ -89,20 +88,20 @@ public class MavenPipeline  extends FunctionSupport implements Function<MavenPip
 
     public static class Arguments {
         @Argument
-        private String gitCloneUrl;
+        private String gitCloneUrl = "";
         @Argument
-        private Boolean useGitTagForNextVersion;
+        private boolean useGitTagForNextVersion = false;
         @Argument
-        private String extraSetVersionArgs;
+        private String extraSetVersionArgs = "";
         @Argument
         private List<String> extraImagesToStage = new ArrayList<>();
         @Argument
         private String containerName = "maven";
 
         @Argument
-        private String dockerOrganisation;
+        private String dockerOrganisation = "";
         @Argument
-        private String promoteToDockerRegistry;
+        private String promoteToDockerRegistry = "";
         @Argument
         private List<String> promoteDockerImages = new ArrayList<>();
         @Argument
@@ -110,11 +109,11 @@ public class MavenPipeline  extends FunctionSupport implements Function<MavenPip
         @Argument
         private String repositoryToWaitFor = ServiceConstants.MAVEN_CENTRAL;
         @Argument
-        private String groupId;
+        private String groupId = "";
         @Argument
-        private String artifactExtensionToWaitFor;
+        private String artifactExtensionToWaitFor = "";
         @Argument
-        private String artifactIdToWaitFor;
+        private String artifactIdToWaitFor = "";
 
 
         public String getGitCloneUrl() {
@@ -152,12 +151,11 @@ public class MavenPipeline  extends FunctionSupport implements Function<MavenPip
             return answer;
         }
 
-
-        public Boolean getUseGitTagForNextVersion() {
+        public boolean isUseGitTagForNextVersion() {
             return useGitTagForNextVersion;
         }
 
-        public void setUseGitTagForNextVersion(Boolean useGitTagForNextVersion) {
+        public void setUseGitTagForNextVersion(boolean useGitTagForNextVersion) {
             this.useGitTagForNextVersion = useGitTagForNextVersion;
         }
 

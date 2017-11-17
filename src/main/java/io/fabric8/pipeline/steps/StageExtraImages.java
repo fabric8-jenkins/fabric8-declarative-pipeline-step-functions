@@ -67,7 +67,7 @@ public class StageExtraImages extends FunctionSupport implements Function<StageE
 
     public static class Arguments {
         @Argument
-        private String tag;
+        private String tag = "";
         @Argument
         private List<String> images = new ArrayList<>();
 

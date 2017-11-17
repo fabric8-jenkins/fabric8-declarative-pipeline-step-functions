@@ -306,7 +306,7 @@ public class Fabric8Commands extends FunctionSupport {
         return shOutput("git commit -a -m \'Bump " + property + " development profile SNAPSHOT version\'");
     }
 
-    public String setupWorkspaceForRelease(String project, Boolean useGitTagForNextVersion, String mvnExtraArgs, String currentVersion) throws IOException {
+    public String setupWorkspaceForRelease(String project, boolean useGitTagForNextVersion, String mvnExtraArgs, String currentVersion) throws IOException {
         sh("git config user.email fabric8-admin@googlegroups.com");
         sh("git config user.name fabric8-release");
 

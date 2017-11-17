@@ -62,6 +62,14 @@ public class ContentRepository extends FunctionSupport implements Function<Conte
         @Argument
         private boolean useContentRepository = true;
 
+        public Arguments() {
+        }
+
+        public Arguments(boolean useContentRepository, String serviceName) {
+            this.serviceName = serviceName;
+            this.useContentRepository = useContentRepository;
+        }
+
         public String getServiceName() {
             return serviceName;
         }

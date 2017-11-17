@@ -84,6 +84,14 @@ public class BayesianScanner extends FunctionSupport implements Function<Bayesia
         @Argument
         private boolean runBayesianScanner = true;
 
+        public Arguments() {
+        }
+
+        public Arguments(String serviceName, boolean runBayesianScanner) {
+            this.serviceName = serviceName;
+            this.runBayesianScanner = runBayesianScanner;
+        }
+
         public String getServiceName() {
             return serviceName;
         }

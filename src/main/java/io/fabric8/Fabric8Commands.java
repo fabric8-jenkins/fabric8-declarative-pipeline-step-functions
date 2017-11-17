@@ -21,7 +21,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-import io.fabric8.pipeline.steps.ServiceConstants;
+import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.fabric8.pipeline.steps.helpers.DomUtils;
 import io.fabric8.pipeline.steps.helpers.FailedBuildException;
 import io.fabric8.utils.IOHelpers;

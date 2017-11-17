@@ -25,7 +25,7 @@ import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-import static io.fabric8.pipeline.steps.ServiceConstants.MAVEN_CENTRAL;
+import static io.fabric8.pipeline.steps.model.ServiceConstants.MAVEN_CENTRAL;
 
 @Step(displayName = "Performs a SonarQube scan")
 public class SonarQubeScanner extends FunctionSupport implements Function<SonarQubeScanner.Arguments, String> {
@@ -92,6 +92,16 @@ public class SonarQubeScanner extends FunctionSupport implements Function<SonarQ
         private String scannerVersion = "2.8";
         @Argument
         private boolean runSonarScanner = true;
+
+        public Arguments() {
+        }
+
+        public Arguments(boolean runSonarScanner, String scannerVersion, String serviceName, int servicePort) {
+            this.serviceName = serviceName;
+            this.servicePort = servicePort;
+            this.scannerVersion = scannerVersion;
+            this.runSonarScanner = runSonarScanner;
+        }
 
         public String getServiceName() {
             return serviceName;

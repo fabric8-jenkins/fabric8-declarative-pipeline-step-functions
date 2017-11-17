@@ -17,6 +17,7 @@ package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
 import io.fabric8.FunctionSupport;
+import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 

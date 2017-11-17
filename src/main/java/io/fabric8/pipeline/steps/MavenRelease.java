@@ -64,7 +64,7 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
         sh("mvn clean -B -e -U deploy -Dmaven.test.skip=" + skipTests + " -P openshift");
 
 
-        new JUnitResults(this).apply(args.getJUnitArguments());
+        new JUnitResults(this).apply(args.createJUnitArguments());
 
         String buildName = "";
         try {
@@ -84,11 +84,11 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
                 utils.addAnnotationToBuild("fabric8.io/jenkins.changeUrl", (String) changeUrl);
             }
 
-            new BayesianScanner(this).apply(args.getBayesianScannerArguments());
+            new BayesianScanner(this).apply(args.createBayesianScannerArguments());
         }
 
 
-        new SonarQubeScanner(this).apply(args.getSonarQubeArguments());
+        new SonarQubeScanner(this).apply(args.createSonarQubeArguments());
 
 
         final boolean s2iMode = utils.supportsOpenShiftS2I();
@@ -100,7 +100,7 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
                 echo("Running on a single node, skipping docker push as not needed");
                 Model model = null;
                 try {
-                    model = new ReadMavenPom(this).apply(args.getReadMavenPomArguments());
+                    model = new ReadMavenPom(this).apply(args.createReadMavenPomArguments());
                 } catch (Exception e) {
                     error("Failed to read pom.xml", e);
                 }
@@ -128,10 +128,8 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
                 });
 
             }
-
-
         }
-        new ContentRepository(this).apply(args.getContentRepositoryArguments());
+        new ContentRepository(this).apply(args.createContentRepositoryArguments());
         return null;
     }
 
@@ -141,15 +139,56 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
         @Argument
         private String version;
         @Argument
-        private JUnitResults.Arguments JUnitArguments = new JUnitResults.Arguments();
+        private boolean enableArchiveTestResults = true;
+
         @Argument
-        private BayesianScanner.Arguments bayesianScannerArguments = new BayesianScanner.Arguments();
+        private String analyticsServiceName = "bayesian-link";
         @Argument
-        private SonarQubeScanner.Arguments sonarQubeArguments = new SonarQubeScanner.Arguments();
+        private boolean enableAnalyticsScan = true;
+
         @Argument
-        private ContentRepository.Arguments contentRepositoryArguments = new ContentRepository.Arguments();
+        private String sonarQubeServiceName = "sonarqube";
         @Argument
-        private ReadMavenPom.Arguments readMavenPomArguments = new ReadMavenPom.Arguments();
+        private int sonarQubePort = 9000;
+        @Argument
+        private String sonarQubeScannerVersion = "2.8";
+        @Argument
+        private boolean enableSonarQubeScan = true;
+
+        @Argument
+        private String contentRepositoryServiceName = "content-repository";
+        @Argument
+        private boolean enableContentRepositorySiteReport = true;
+
+        @Argument
+        private String pomFileName;
+
+        // Adapters
+        //-------------------------------------------------------------------------
+
+        public JUnitResults.Arguments createJUnitArguments() {
+            return new JUnitResults.Arguments(enableArchiveTestResults);
+        }
+
+        public BayesianScanner.Arguments createBayesianScannerArguments() {
+            return new BayesianScanner.Arguments(analyticsServiceName, enableAnalyticsScan);
+        }
+
+        public SonarQubeScanner.Arguments createSonarQubeArguments() {
+            return new SonarQubeScanner.Arguments(enableSonarQubeScan, sonarQubeScannerVersion, sonarQubeServiceName, sonarQubePort);
+        }
+
+        public ContentRepository.Arguments createContentRepositoryArguments() {
+            return new ContentRepository.Arguments(enableContentRepositorySiteReport, contentRepositoryServiceName);
+        }
+
+        public ReadMavenPom.Arguments createReadMavenPomArguments() {
+            return new ReadMavenPom.Arguments(pomFileName);
+        }
+
+
+        // Properties
+        //-------------------------------------------------------------------------
 
         public boolean isSkipTests() {
             return skipTests;
@@ -167,44 +206,84 @@ public class MavenRelease extends FunctionSupport implements Function<MavenRelea
             this.version = version;
         }
 
-        public JUnitResults.Arguments getJUnitArguments() {
-            return JUnitArguments;
+        public boolean isEnableArchiveTestResults() {
+            return enableArchiveTestResults;
         }
 
-        public void setJUnitArguments(JUnitResults.Arguments JUnitArguments) {
-            this.JUnitArguments = JUnitArguments;
+        public void setEnableArchiveTestResults(boolean enableArchiveTestResults) {
+            this.enableArchiveTestResults = enableArchiveTestResults;
         }
 
-        public BayesianScanner.Arguments getBayesianScannerArguments() {
-            return bayesianScannerArguments;
+        public String getAnalyticsServiceName() {
+            return analyticsServiceName;
         }
 
-        public void setBayesianScannerArguments(BayesianScanner.Arguments bayesianScannerArguments) {
-            this.bayesianScannerArguments = bayesianScannerArguments;
+        public void setAnalyticsServiceName(String analyticsServiceName) {
+            this.analyticsServiceName = analyticsServiceName;
         }
 
-        public SonarQubeScanner.Arguments getSonarQubeArguments() {
-            return sonarQubeArguments;
+        public boolean isEnableAnalyticsScan() {
+            return enableAnalyticsScan;
         }
 
-        public void setSonarQubeArguments(SonarQubeScanner.Arguments sonarQubeArguments) {
-            this.sonarQubeArguments = sonarQubeArguments;
+        public void setEnableAnalyticsScan(boolean enableAnalyticsScan) {
+            this.enableAnalyticsScan = enableAnalyticsScan;
         }
 
-        public ContentRepository.Arguments getContentRepositoryArguments() {
-            return contentRepositoryArguments;
+        public String getSonarQubeServiceName() {
+            return sonarQubeServiceName;
         }
 
-        public void setContentRepositoryArguments(ContentRepository.Arguments contentRepositoryArguments) {
-            this.contentRepositoryArguments = contentRepositoryArguments;
+        public void setSonarQubeServiceName(String sonarQubeServiceName) {
+            this.sonarQubeServiceName = sonarQubeServiceName;
         }
 
-        public ReadMavenPom.Arguments getReadMavenPomArguments() {
-            return readMavenPomArguments;
+        public int getSonarQubePort() {
+            return sonarQubePort;
         }
 
-        public void setReadMavenPomArguments(ReadMavenPom.Arguments readMavenPomArguments) {
-            this.readMavenPomArguments = readMavenPomArguments;
+        public void setSonarQubePort(int sonarQubePort) {
+            this.sonarQubePort = sonarQubePort;
+        }
+
+        public String getSonarQubeScannerVersion() {
+            return sonarQubeScannerVersion;
+        }
+
+        public void setSonarQubeScannerVersion(String sonarQubeScannerVersion) {
+            this.sonarQubeScannerVersion = sonarQubeScannerVersion;
+        }
+
+        public boolean isEnableSonarQubeScan() {
+            return enableSonarQubeScan;
+        }
+
+        public void setEnableSonarQubeScan(boolean enableSonarQubeScan) {
+            this.enableSonarQubeScan = enableSonarQubeScan;
+        }
+
+        public String getContentRepositoryServiceName() {
+            return contentRepositoryServiceName;
+        }
+
+        public void setContentRepositoryServiceName(String contentRepositoryServiceName) {
+            this.contentRepositoryServiceName = contentRepositoryServiceName;
+        }
+
+        public boolean isEnableContentRepositorySiteReport() {
+            return enableContentRepositorySiteReport;
+        }
+
+        public void setEnableContentRepositorySiteReport(boolean enableContentRepositorySiteReport) {
+            this.enableContentRepositorySiteReport = enableContentRepositorySiteReport;
+        }
+
+        public String getPomFileName() {
+            return pomFileName;
+        }
+
+        public void setPomFileName(String pomFileName) {
+            this.pomFileName = pomFileName;
         }
     }
 

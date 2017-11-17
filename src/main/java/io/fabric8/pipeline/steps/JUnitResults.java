@@ -68,6 +68,13 @@ public class JUnitResults extends FunctionSupport implements Function<JUnitResul
         @Argument
         private boolean archiveTestResults = true;
 
+        public Arguments() {
+        }
+
+        public Arguments(boolean archiveTestResults) {
+            this.archiveTestResults = archiveTestResults;
+        }
+
         public boolean isArchiveTestResults() {
             return archiveTestResults;
         }

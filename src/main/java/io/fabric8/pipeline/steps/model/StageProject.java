@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.fabric8.pipeline.steps;
+package io.fabric8.pipeline.steps.model;
 
 import io.fabric8.Fabric8Commands;
 import io.fabric8.FunctionSupport;
+import io.fabric8.pipeline.steps.StageExtraImages;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 

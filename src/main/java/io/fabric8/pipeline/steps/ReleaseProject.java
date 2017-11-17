@@ -1,12 +1,12 @@
 /**
  * Copyright (C) Original Authors 2017
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,8 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.FunctionSupport;
+import io.fabric8.pipeline.steps.model.ServiceConstants;
+import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Logger;
@@ -64,7 +66,11 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
 
     public static class Arguments {
         @Argument
-        private StagedProjectInfo stagedProject;
+        private String project;
+        @Argument
+        private String releaseVersion;
+        @Argument
+        private List<String> repoIds;
         @Argument
         private String containerName = "maven";
         @Argument
@@ -88,13 +94,17 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
         }
 
         public Arguments(StagedProjectInfo stagedProject) {
-            this.stagedProject = stagedProject;
+            this.project = stagedProject.getProject();
+            this.releaseVersion = stagedProject.getReleaseVersion();
+            this.repoIds = stagedProject.getRepoIds();
         }
 
         @Override
         public String toString() {
             return "Arguments{" +
-                    "stagedProject=" + stagedProject +
+                    "project=" + project +
+                    ", releaseVersion='" + releaseVersion + '\'' +
+                    ", repoIds='" + repoIds + '\'' +
                     ", containerName='" + containerName + '\'' +
                     ", dockerOrganisation='" + dockerOrganisation + '\'' +
                     ", promoteToDockerRegistry='" + promoteToDockerRegistry + '\'' +
@@ -111,8 +121,7 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
          * Returns the arguments for invoking {@link PromoteArtifacts}
          */
         public PromoteArtifacts.Arguments createPromoteArtifactsArguments() {
-            StagedProjectInfo stagedProject = getStagedProject();
-            return new PromoteArtifacts.Arguments(stagedProject.getProject(), stagedProject.getReleaseVersion(), stagedProject.getRepoIds());
+            return new PromoteArtifacts.Arguments(getProject(), getReleaseVersion(), getRepoIds());
         }
 
         /**
@@ -120,7 +129,6 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
          * to promote images
          */
         public PromoteImages.Arguments createPromoteImagesArguments(Logger logger) {
-            StagedProjectInfo stagedProject = getStagedProject();
             String org = getDockerOrganisation();
             String toRegistry = getPromoteToDockerRegistry();
             List<String> images = getPromoteDockerImages();
@@ -133,7 +141,7 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
                     logger.warn("Cannot promote images " + images + " as missing the promoteToDockerRegistry argument: " + this);
                     return null;
                 }
-                return new PromoteImages.Arguments(stagedProject.getReleaseVersion(), org, toRegistry, images);
+                return new PromoteImages.Arguments(getReleaseVersion(), org, toRegistry, images);
             }
             return null;
         }
@@ -142,9 +150,8 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
          * Returns the arguments for invoking {@link TagImages} or null if there are no images to tag
          */
         public TagImages.Arguments createTagImagesArguments() {
-            StagedProjectInfo stagedProject = getStagedProject();
             if (extraImagesToTag != null && !extraImagesToTag.isEmpty()) {
-                return new TagImages.Arguments(stagedProject.getReleaseVersion(), extraImagesToTag);
+                return new TagImages.Arguments(getReleaseVersion(), extraImagesToTag);
             } else {
                 return null;
             }
@@ -156,7 +163,7 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
          * @param pullRequestId
          */
         public WaitUntilPullRequestMerged.Arguments createWaitUntilPullRequestMergedArguments(GHPullRequest pullRequestId) {
-            return new WaitUntilPullRequestMerged.Arguments(pullRequestId.getId(), getStagedProject().getProject());
+            return new WaitUntilPullRequestMerged.Arguments(pullRequestId.getId(), getProject());
         }
 
         /**
@@ -168,7 +175,7 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
                 return null;
             }
 
-            WaitUntilArtifactSyncedWithCentral.Arguments arguments = new WaitUntilArtifactSyncedWithCentral.Arguments(groupId, artifactIdToWaitFor, getStagedProject().getReleaseVersion());
+            WaitUntilArtifactSyncedWithCentral.Arguments arguments = new WaitUntilArtifactSyncedWithCentral.Arguments(groupId, artifactIdToWaitFor, getReleaseVersion());
             if (Strings.notEmpty(artifactExtensionToWaitFor)) {
                 arguments.setExt(artifactExtensionToWaitFor);
             }
@@ -178,12 +185,31 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
             return arguments;
         }
 
-        public StagedProjectInfo getStagedProject() {
-            return stagedProject;
+        // Properties
+        //-------------------------------------------------------------------------
+
+        public String getProject() {
+            return project;
         }
 
-        public void setStagedProject(StagedProjectInfo stagedProject) {
-            this.stagedProject = stagedProject;
+        public void setProject(String project) {
+            this.project = project;
+        }
+
+        public String getReleaseVersion() {
+            return releaseVersion;
+        }
+
+        public void setReleaseVersion(String releaseVersion) {
+            this.releaseVersion = releaseVersion;
+        }
+
+        public List<String> getRepoIds() {
+            return repoIds;
+        }
+
+        public void setRepoIds(List<String> repoIds) {
+            this.repoIds = repoIds;
         }
 
         public String getContainerName() {

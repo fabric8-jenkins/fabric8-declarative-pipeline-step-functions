@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  */
-public class Fabric8CommandsVersionTest {
+public class Fabric8CommandsVersionIT {
     protected Fabric8Commands step = Tests.createFabric8Commands(getClass());
 
     protected static void sh(Fabric8Commands step, String command) {

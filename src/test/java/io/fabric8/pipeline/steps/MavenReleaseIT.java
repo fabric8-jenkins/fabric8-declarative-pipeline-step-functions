@@ -15,37 +15,36 @@
  */
 package io.fabric8.pipeline.steps;
 
+import io.fabric8.FunctionSupport;
 import io.fabric8.support.Tests;
-import io.jenkins.functions.runtime.FunctionContext;
-import io.jenkins.functions.runtime.StepFunctions;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  */
-public class MavenPipelineTest {
+public class MavenReleaseIT {
     protected File testWorkDir;
-    private FunctionContext functionContext;
 
     @Before
     public void init() {
         testWorkDir = Tests.getCleanWorkDir(getClass());
-        functionContext = new FunctionContext();
-        functionContext.setCurrentDir(testWorkDir);
     }
 
     @Test
     public void testMavenRelease() throws Exception {
-        Map<String, Object> arguments = new HashMap<>();
-        arguments.put("gitCloneUrl", "git@github.com:jstrachan/test-fabric8-declarative-step-functions-library.git");
-        arguments.put("containerName", "maven-3.5");
-        
-        Object result = StepFunctions.invokeFunction("mavenPipeline", arguments, functionContext, MavenPipelineTest.class.getClassLoader());
-        System.out.println("Result: " + result);
+        FunctionSupport test = new FunctionSupport();
+        test.setCurrentDir(testWorkDir);
+        test.git("git@github.com:fabric8io/pipeline-test-project-dependency.git", new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                MavenRelease mvn = new MavenRelease(test);
+                MavenRelease.Arguments args = new MavenRelease.Arguments();
+                return mvn.apply(args);
+            }
+        });
     }
 
 }

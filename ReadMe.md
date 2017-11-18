@@ -1,1 +1,3 @@
-This library re-implements the fabric8-pipeline-library in Java POJOs for use in either scripted or declarative pipelines
+This library re-implements the [fabric8-pipeline-library](https://github.com/fabric8io/fabric8-pipeline-library) in Java POJOs using the [declarative-step-functions-api](https://github.com/fabric8-jenkins/declarative-step-functions-api).
+
+To consume this library inside scripted or declarative pipelines then use the [fabric8-declarative-pipeline-step-functions-plugin](https://github.com/fabric8-jenkins/fabric8-declarative-pipeline-step-functions-plugin) which exports the steps so that they can be used in the Jenkins Pipeline Syntax UI or the Blue Ocean Pipeline Editor.

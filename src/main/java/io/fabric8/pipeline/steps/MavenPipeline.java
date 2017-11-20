@@ -27,6 +27,7 @@ import io.jenkins.functions.Argument;
 import io.jenkins.functions.Logger;
 import io.jenkins.functions.Step;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -87,6 +88,7 @@ public class MavenPipeline  extends FunctionSupport implements Function<MavenPip
     }
 
     public static class Arguments {
+        @NotEmpty
         @Argument
         private String gitCloneUrl = "";
         @Argument

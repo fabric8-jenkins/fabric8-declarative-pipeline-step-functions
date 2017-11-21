@@ -16,7 +16,8 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.Utils;
 import io.fabric8.pipeline.steps.helpers.BooleanHelpers;
 import io.jenkins.functions.Argument;
@@ -28,7 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 @Step(displayName = "Performs a Fabric8 Analytics scan")
-public class BayesianScanner extends FunctionSupport implements Function<BayesianScanner.Arguments, String> {
+public class BayesianScanner extends Fabric8FunctionSupport implements Function<BayesianScanner.Arguments, String> {
 
     public BayesianScanner() {
     }

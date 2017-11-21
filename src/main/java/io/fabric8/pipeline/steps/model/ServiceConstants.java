@@ -15,7 +15,7 @@
  */
 package io.fabric8.pipeline.steps.model;
 
-import io.fabric8.pipeline.steps.helpers.Systems;
+import io.jenkins.functions.runtime.helpers.Systems;
 
 /**
  */

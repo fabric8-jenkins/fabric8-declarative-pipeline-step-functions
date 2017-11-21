@@ -16,7 +16,8 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 @Step(displayName = "Stages a release of the maven project into a staging repository")
-public class StageProject extends FunctionSupport implements Function<StageProject.Arguments, StagedProjectInfo> {
+public class StageProject extends Fabric8FunctionSupport implements Function<StageProject.Arguments, StagedProjectInfo> {
     public StageProject() {
     }
 

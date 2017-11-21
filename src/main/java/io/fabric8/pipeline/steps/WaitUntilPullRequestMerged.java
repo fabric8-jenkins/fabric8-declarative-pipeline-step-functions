@@ -17,9 +17,10 @@ package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
-import io.fabric8.pipeline.steps.git.GitHelper;
-import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
+import io.jenkins.functions.runtime.helpers.GitHelper;
+import io.jenkins.functions.runtime.helpers.FailedBuildException;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 import org.kohsuke.github.GHCommitPointer;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 @Step(displayName = "Waits for a Pull Request to be merged")
-public class WaitUntilPullRequestMerged extends FunctionSupport implements Function<WaitUntilPullRequestMerged.Arguments, Boolean> {
+public class WaitUntilPullRequestMerged extends Fabric8FunctionSupport implements Function<WaitUntilPullRequestMerged.Arguments, Boolean> {
     public WaitUntilPullRequestMerged() {
     }
 

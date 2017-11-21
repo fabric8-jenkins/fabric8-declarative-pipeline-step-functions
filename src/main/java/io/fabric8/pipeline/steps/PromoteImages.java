@@ -17,7 +17,8 @@ package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -33,7 +34,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * Promote images
  */
 @Step(displayName = "Promotes docker images to a docker registry like hub.docker.com")
-public class PromoteImages extends FunctionSupport implements Function<PromoteImages.Arguments, String> {
+public class PromoteImages extends Fabric8FunctionSupport implements Function<PromoteImages.Arguments, String> {
     public PromoteImages() {
     }
 

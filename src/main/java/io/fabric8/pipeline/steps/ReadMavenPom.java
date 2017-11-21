@@ -15,7 +15,8 @@
  */
 package io.fabric8.pipeline.steps;
 
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -33,7 +34,7 @@ import java.io.InputStream;
  * Helper function for reading the maven <code>pom.xml</code> file
  */
 @Step(displayName = "Reads a maven pom.xml file and returns the parsed model")
-public class ReadMavenPom extends FunctionSupport {
+public class ReadMavenPom extends Fabric8FunctionSupport {
     public ReadMavenPom() {
     }
 

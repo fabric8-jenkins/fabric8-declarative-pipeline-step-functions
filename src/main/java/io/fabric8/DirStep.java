@@ -19,7 +19,7 @@ import java.io.File;
 
 /**
  */
-public class DirStep extends FunctionSupport {
+public class DirStep extends Fabric8FunctionSupport {
 
     public DirStep(File currentDir) {
         setCurrentDir(currentDir);

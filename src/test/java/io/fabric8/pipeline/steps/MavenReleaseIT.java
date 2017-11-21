@@ -15,7 +15,8 @@
  */
 package io.fabric8.pipeline.steps;
 
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.support.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,7 @@ public class MavenReleaseIT {
 
     @Test
     public void testMavenRelease() throws Exception {
-        FunctionSupport test = new FunctionSupport();
+        FunctionSupport test = new Fabric8FunctionSupport();
         test.setCurrentDir(testWorkDir);
         test.git("git@github.com:fabric8io/pipeline-test-project-dependency.git", new Callable<Object>() {
             @Override

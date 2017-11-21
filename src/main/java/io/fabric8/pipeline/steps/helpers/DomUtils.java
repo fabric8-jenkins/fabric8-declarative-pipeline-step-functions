@@ -24,7 +24,7 @@ import org.w3c.dom.NodeList;
 
 import java.net.URL;
 
-import static io.fabric8.pipeline.steps.helpers.Loggers.error;
+import static io.jenkins.functions.runtime.helpers.Loggers.error;
 
 
 /**

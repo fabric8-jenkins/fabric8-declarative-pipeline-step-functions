@@ -16,8 +16,9 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
-import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
+import io.jenkins.functions.runtime.helpers.FailedBuildException;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
@@ -28,7 +29,7 @@ import java.util.function.Function;
 import static io.fabric8.pipeline.steps.model.ServiceConstants.MAVEN_CENTRAL;
 
 @Step(displayName = "Performs a SonarQube scan")
-public class SonarQubeScanner extends FunctionSupport implements Function<SonarQubeScanner.Arguments, String> {
+public class SonarQubeScanner extends Fabric8FunctionSupport implements Function<SonarQubeScanner.Arguments, String> {
 
     public SonarQubeScanner() {
     }

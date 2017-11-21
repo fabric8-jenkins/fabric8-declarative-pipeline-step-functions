@@ -17,7 +17,8 @@ package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -29,7 +30,7 @@ import java.util.function.Function;
  * Waits for a maven artifact to be in the maven central repository
  */
 @Step(displayName = "Waits for an artifact to be synchronized to a central registry")
-public class WaitUntilArtifactSyncedWithCentral extends FunctionSupport implements Function<WaitUntilArtifactSyncedWithCentral.Arguments, String> {
+public class WaitUntilArtifactSyncedWithCentral extends Fabric8FunctionSupport implements Function<WaitUntilArtifactSyncedWithCentral.Arguments, String> {
     public WaitUntilArtifactSyncedWithCentral() {
     }
 

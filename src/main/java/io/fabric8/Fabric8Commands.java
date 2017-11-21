@@ -23,10 +23,11 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.fabric8.pipeline.steps.helpers.DomUtils;
-import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.jenkins.functions.runtime.helpers.FailedBuildException;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
 import io.fabric8.utils.XmlUtils;
+import io.jenkins.functions.runtime.FunctionSupport;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHPullRequest;
@@ -53,7 +54,7 @@ import static io.fabric8.Utils.createKubernetesClient;
 import static io.fabric8.Utils.defaultNamespace;
 import static java.lang.Integer.parseInt;
 
-public class Fabric8Commands extends FunctionSupport {
+public class Fabric8Commands extends Fabric8FunctionSupport {
     private boolean debugSemVerReleaseVersion = false;
 
     public Fabric8Commands(FunctionSupport parentStep) {

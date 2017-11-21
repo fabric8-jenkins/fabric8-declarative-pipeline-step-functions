@@ -16,7 +16,8 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 import org.kohsuke.github.GHPullRequest;
@@ -27,7 +28,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 @Step(displayName = "Promotes maven archetypes to a nexus repository")
-public class PromoteArtifacts extends FunctionSupport implements Function<PromoteArtifacts.Arguments, GHPullRequest> {
+public class PromoteArtifacts extends Fabric8FunctionSupport implements Function<PromoteArtifacts.Arguments, GHPullRequest> {
 
     public PromoteArtifacts() {
     }

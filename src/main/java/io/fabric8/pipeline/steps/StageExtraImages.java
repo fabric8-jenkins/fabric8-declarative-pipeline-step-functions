@@ -16,7 +16,8 @@
 package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Step(displayName = "Stages additional docker images")
-public class StageExtraImages extends FunctionSupport implements Function<StageExtraImages.Arguments, String> {
+public class StageExtraImages extends Fabric8FunctionSupport implements Function<StageExtraImages.Arguments, String> {
     public StageExtraImages() {
     }
 

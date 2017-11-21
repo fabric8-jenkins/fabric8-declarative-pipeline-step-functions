@@ -15,7 +15,8 @@
  */
 package io.fabric8.pipeline.steps;
 
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Step(displayName = "Archives the JUnit test results")
-public class JUnitResults extends FunctionSupport implements Function<JUnitResults.Arguments, String> {
+public class JUnitResults extends Fabric8FunctionSupport implements Function<JUnitResults.Arguments, String> {
     public JUnitResults() {
     }
 

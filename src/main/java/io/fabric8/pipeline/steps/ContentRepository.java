@@ -16,14 +16,15 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
 import java.util.function.Function;
 
 @Step(displayName = "Optionally deploys the maven site to the content repository")
-public class ContentRepository extends FunctionSupport implements Function<ContentRepository.Arguments, String> {
+public class ContentRepository extends Fabric8FunctionSupport implements Function<ContentRepository.Arguments, String> {
     public ContentRepository() {
     }
 

@@ -15,7 +15,8 @@
  */
 package io.fabric8.pipeline.steps;
 
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.fabric8.utils.Strings;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Step(displayName = "Releases a staged release promoting artifacts and docker images and waiting until artifacts are synced to the central repository")
-public class ReleaseProject extends FunctionSupport implements Function<ReleaseProject.Arguments, Boolean> {
+public class ReleaseProject extends Fabric8FunctionSupport implements Function<ReleaseProject.Arguments, Boolean> {
     public ReleaseProject() {
     }
 

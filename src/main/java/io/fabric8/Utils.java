@@ -31,6 +31,7 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftAPIGroups;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.utils.Strings;
+import io.jenkins.functions.runtime.FunctionSupport;
 import jenkins.model.Jenkins;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.csanchez.jenkins.plugins.kubernetes.PodAnnotation;
@@ -43,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Utils extends FunctionSupport {
+public class Utils extends Fabric8FunctionSupport {
     public Utils(FunctionSupport parentStep) {
         super(parentStep);
     }

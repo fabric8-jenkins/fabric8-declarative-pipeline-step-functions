@@ -15,11 +15,12 @@
  */
 package io.fabric8.pipeline.steps;
 
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.Utils;
-import io.fabric8.pipeline.steps.git.GitHelper;
-import io.fabric8.pipeline.steps.git.GitRepositoryInfo;
-import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.jenkins.functions.runtime.helpers.GitHelper;
+import io.jenkins.functions.runtime.helpers.GitRepositoryInfo;
+import io.jenkins.functions.runtime.helpers.FailedBuildException;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.fabric8.utils.Strings;
@@ -36,7 +37,7 @@ import java.util.function.Function;
  * Performs a full CI / CD pipeline for maven projects
  */
 @Step(displayName = "Full CI / CD pipeline for maven projects")
-public class MavenPipeline  extends FunctionSupport implements Function<MavenPipeline.Arguments, Boolean> {
+public class MavenPipeline  extends Fabric8FunctionSupport implements Function<MavenPipeline.Arguments, Boolean> {
     public MavenPipeline() {
     }
 

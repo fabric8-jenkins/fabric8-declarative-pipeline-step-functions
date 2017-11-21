@@ -16,9 +16,10 @@
 package io.fabric8.pipeline.steps;
 
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.Utils;
-import io.fabric8.pipeline.steps.helpers.FailedBuildException;
+import io.jenkins.functions.runtime.helpers.FailedBuildException;
 import io.fabric8.utils.Strings;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -28,14 +29,14 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-import static io.fabric8.pipeline.steps.helpers.Systems.getEnvVar;
+import static io.jenkins.functions.runtime.helpers.Systems.getEnvVar;
 import static io.fabric8.utils.Strings.notEmpty;
 
 /**
  * Declarative step function to perform a maven release
  */
 @Step(displayName = "Performs a maven release without using a staging repository")
-public class MavenRelease extends FunctionSupport implements Function<MavenRelease.Arguments, String> {
+public class MavenRelease extends Fabric8FunctionSupport implements Function<MavenRelease.Arguments, String> {
 
     public MavenRelease() {
     }

@@ -17,7 +17,8 @@ package io.fabric8.pipeline.steps;
 
 import com.google.common.base.Strings;
 import io.fabric8.Fabric8Commands;
-import io.fabric8.FunctionSupport;
+import io.fabric8.Fabric8FunctionSupport;
+import io.jenkins.functions.runtime.FunctionSupport;
 import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
@@ -29,7 +30,7 @@ import java.util.function.Function;
  * Waits for a jenkins plugin to be available in the Jenkins archive
  */
 @Step(displayName = "Waits for a jenkins plugin to be synchronized with the jenkins plugin archive")
-public class WaitUntilJenkinsPluginSynced extends FunctionSupport implements Function<WaitUntilJenkinsPluginSynced.Arguments, Boolean> {
+public class WaitUntilJenkinsPluginSynced extends Fabric8FunctionSupport implements Function<WaitUntilJenkinsPluginSynced.Arguments, Boolean> {
     public WaitUntilJenkinsPluginSynced() {
     }
 

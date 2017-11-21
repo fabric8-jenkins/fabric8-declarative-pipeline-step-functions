@@ -22,6 +22,7 @@ import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.function.Function;
 
 /**
@@ -63,10 +64,13 @@ public class WaitUntilArtifactSyncedWithCentral extends FunctionSupport implemen
         @Argument
         private String repo = ServiceConstants.MAVEN_CENTRAL;
         @Argument
+        @NotEmpty
         private String groupId = "";
         @Argument
+        @NotEmpty
         private String artifactId = "";
         @Argument
+        @NotEmpty
         private String version = "";
         @Argument
         private String ext = "jar";

@@ -21,6 +21,7 @@ import io.fabric8.pipeline.steps.model.StagedProjectInfo;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -88,6 +89,7 @@ public class StageProject extends FunctionSupport implements Function<StageProje
 
     public static class Arguments {
         @Argument
+        @NotEmpty
         private String project = "";
         @Argument
         private boolean useGitTagForNextVersion;

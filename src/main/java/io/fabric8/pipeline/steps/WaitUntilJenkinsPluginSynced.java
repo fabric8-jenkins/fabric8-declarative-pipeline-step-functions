@@ -22,6 +22,7 @@ import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.function.Function;
 
 /**
@@ -70,8 +71,10 @@ public class WaitUntilJenkinsPluginSynced extends FunctionSupport implements Fun
         @Argument
         private String repo = ServiceConstants.JENKINS_ARCHIVE_REPO;
         @Argument
+        @NotEmpty
         private String name = "";
         @Argument
+        @NotEmpty
         private String version = "";
 
         @Override

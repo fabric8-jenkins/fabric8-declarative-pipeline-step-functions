@@ -24,6 +24,7 @@ import io.jenkins.functions.Logger;
 import io.jenkins.functions.Step;
 import org.kohsuke.github.GHPullRequest;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -66,8 +67,10 @@ public class ReleaseProject extends FunctionSupport implements Function<ReleaseP
 
     public static class Arguments {
         @Argument
+        @NotEmpty
         private String project = "";
         @Argument
+        @NotEmpty
         private String releaseVersion = "";
         @Argument
         private List<String> repoIds = new ArrayList<>();

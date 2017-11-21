@@ -28,6 +28,8 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -136,8 +138,10 @@ public class WaitUntilPullRequestMerged extends FunctionSupport implements Funct
 
     public static class Arguments {
         @Argument
+        @Positive
         private int id = 0;
         @Argument
+        @NotEmpty
         private String project = "";
 
         public Arguments() {

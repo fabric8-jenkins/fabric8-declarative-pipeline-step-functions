@@ -21,6 +21,7 @@ import io.fabric8.pipeline.steps.model.ServiceConstants;
 import io.jenkins.functions.Argument;
 import io.jenkins.functions.Step;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +76,7 @@ public class TagImages extends FunctionSupport implements Function<TagImages.Arg
 
     public static class Arguments {
         @Argument
+        @NotEmpty
         private String tag = "";
         @Argument
         private List<String> images = new ArrayList<>();

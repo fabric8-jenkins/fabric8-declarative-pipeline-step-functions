@@ -56,17 +56,18 @@ public class MavenPipeline  extends Fabric8FunctionSupport implements Function<M
         } else if (utils.isCD()) {
             return cdPipeline(arguments);
         } else {
-            getLogger().error("Unknown configuration - neither a CI or CD pipeline!");
+            // for now lets assume a CI pipeline
+            return ciPipeline(arguments);
         }
-        return false;
     }
 
     /**
      * Implements the CI pipeline
      */
     protected Boolean ciPipeline(Arguments arguments) {
-        // TODO
-        echo("No CI pipeline supported yet ;)");
+        echo("Performing CI pipeline");
+        //sh("mvn clean install");
+        sh("mvn -version");
         return false;
     }
 
@@ -74,6 +75,7 @@ public class MavenPipeline  extends Fabric8FunctionSupport implements Function<M
      * Implements the CD pipeline
      */
     protected Boolean cdPipeline(Arguments arguments) {
+        echo("Performing CD pipeline");
         String gitCloneUrl = arguments.getGitCloneUrl();
         if (Strings.isNullOrBlank(gitCloneUrl)) {
             error("No gitCloneUrl configured for this pipeline!");
